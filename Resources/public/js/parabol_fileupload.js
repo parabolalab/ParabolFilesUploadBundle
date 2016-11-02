@@ -1,0 +1,99 @@
+$(document).ready(function () {
+       var sortableNewValues = {};
+       if($('.fileupload').length)
+	   {	
+
+			$('.fileupload').each(function(){
+
+				var id = $(this).attr('id');
+				sortableNewValues[id] =  {'values': {}, length: 0}
+				var files_error = false;
+				$('.alert.alert-danger li').each(function(){
+					if($(this).text().trim() == 'Files error') files_error = true;
+				})
+				if(files_error) $(this).find('.files-error').removeClass('hidden');
+
+				var $input = $(this).find('.fileupload-input')
+
+				 $(this).fileupload({
+			       	dataType: 'json',
+			       	autoUpload: true,
+			        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|pdf|zip|mp4|svg)$/i,
+			        maxFileSize: 5000000, // 5 MB
+			        disableImageResize: true,
+			        previewMaxWidth: 100,
+			        previewMaxHeight: 100,
+			        previewCrop: true,
+			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context')}	        
+		        })
+				.on('fileuploadfinished', function (e, data) {
+					if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
+					if($('input[id$=_filesUpdatedAt]').length) $('input[id$=_filesUpdatedAt]').val(moment().format('YYYY-MM-DD HH:mm:ss'))
+
+					if(sortableNewValues[id].length) renewSortableValues(id, $('ul#' + id + '-files'))
+		   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
+		   	    })
+			    .on('fileuploadprocessstart', function (e) {
+			    	console.log('fileuploadprocessstart')
+			    	if(typeof(parabol_file_browser_maxPerPage) == 'integer')
+			    	{
+			    			if($('#' + id + '-files > li').length > parabol_file_browser_maxPerPage) $('#' + id + '-files > li:' + ($input.data('order') == 'desc' ? 'last' : 'first') + '-child').hide();
+			    	}
+			    	if($input.data('order') == 'desc') $('#' + id + '-files > div:last-child').prependTo('#' + id + '-files');
+			    	// alert('aa')
+			    })
+			    ;
+
+				if($input.data('class'))
+				{
+
+					$.getJSON(
+						sf_env+'/_uploader/get', 
+						{params: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context') }, type: $input.data('type') },
+						function (files) {
+
+							$('#' + id + ' .file-list .label').addClass('hidden');
+							$('#' + id + ' .file-list .label:lt('+files.length+')').removeClass('hidden'); 
+
+							var fu = $('#' + id).data('blueimp-fileupload'),
+				            template;
+				            // fu._adjustMaxNumberOfFiles(-files.length);
+				            template = fu._renderDownload(files)
+				              .appendTo($('#' + id).find('.files'));
+				            // Force reflow:
+				            fu._reflow = fu._transition && template.length &&
+				              template[0].offsetWidth;
+				            template.addClass('in');
+				            $('#loading').remove();
+
+				            $('#' + id + ' ul.files').sortable({
+				            	placeholder: '<li class="placeholder template-download btn btn-default"></li>',
+				            	onDrop: function ($item, container, _super, event) {
+								  $item.removeClass("dragged").removeAttr("style")
+								  $("body").removeClass("dragging")
+								  renewSortableValues(id, $(container.el))
+				            	  $.post(sf_env+'/_uploader/update-position', $item.data(), function(jdata){
+				            	  		if(jdata.result != 'success')
+				            	  		{
+				            	  			alert('error');
+				            	  		}
+				            	  });
+
+								}
+				            })
+			        });
+			    }
+		    })
+		}
+        function renewSortableValues(id, $obj)
+        {
+        	var max = $obj.children().length;
+        	sortableNewValues[id].length = 0;
+			$obj.children().each(function(index){
+				sortableNewValues[id].values[$(this).attr('data-id')] = max - index; 
+				$(this).attr('data-sort', max - index)
+				sortableNewValues[id].length++;
+			})
+        }
+
+})

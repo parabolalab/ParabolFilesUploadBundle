@@ -1,4 +1,12 @@
 services:
-#    parabol_files_upload.example:
-#        class: Parabol\FilesUploadBundle\Example
-#        arguments: ["@service_id", "plain_value", %parameter%]
+    parabol.subscriber.file_relation:
+        class: Parabol\FilesUploadBundle\EventListener\FileRelationSubscriber
+        arguments:
+            - "@service_container"
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }        
+
+    parabol.type_extension.blueimp_upload:
+        class: Parabol\FilesUploadBundle\Form\Type\BlueimpType
+        tags:
+            - { name: form.type, alias: blueimp_upload }

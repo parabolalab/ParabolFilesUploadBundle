@@ -1,3 +1,19 @@
-parabol_files_upload_homepage:
-    path:     /
-    defaults: { _controller: ParabolFilesUploadBundle:Default:index }
+parabol_uploader:
+    path: /_uploader/upload
+    defaults:  { _controller: ParabolFileUploadBundle:Blueimp:upload }
+    options: { i18n: false }
+
+parabol_uploader_get:
+    path: /_uploader/get
+    defaults:  { _controller: ParabolFileUploadBundle:Blueimp:get }
+    options: { i18n: false }
+
+parabol_uploader_delete:
+    path: /_uploader/delete/{id}
+    defaults:  { _controller: ParabolFileUploadBundle:Blueimp:delete }
+    options: { i18n: false }
+
+parabol_uploader_update_pos:
+    path: /_uploader/update-position
+    defaults:  { _controller: ParabolFileUploadBundle:Blueimp:updatePosition }
+    options: { i18n: false }
