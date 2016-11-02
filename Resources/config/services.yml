@@ -1,0 +1,4 @@
+services:
+#    parabol_files_upload.example:
+#        class: Parabol\FilesUploadBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]
