@@ -102,12 +102,12 @@ class File extends BaseEntity
     private $cssStyle;  
 
     /**
-     * @ORM\Column(name="width", type="smallint")
+     * @ORM\Column(name="width", type="smallint", nullable=true)
      */
     private $width;
 
      /**
-      * @ORM\Column(name="height", type="smallint")
+      * @ORM\Column(name="height", type="smallint", nullable=true)
       */
     private $height;
 

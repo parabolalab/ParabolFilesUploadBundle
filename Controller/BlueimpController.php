@@ -14,6 +14,7 @@ class BlueimpController extends Controller
    
     public function uploadAction(Request $request)
     {
+        $request->getSession()->start();
 
         $class = $request->get('class');
         $context = $request->get('context');
@@ -63,7 +64,7 @@ class BlueimpController extends Controller
             if($class) $f->setClass($class);
             if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
 
-            $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $this->get('session')->getId() . '|' . $class));
+            $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
 
             $file->move($dir, $slugizedName);
 
