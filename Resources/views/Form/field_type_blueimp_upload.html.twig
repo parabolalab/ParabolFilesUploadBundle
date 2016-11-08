@@ -1,0 +1,139 @@
+{% trans_default_domain "Admingenerator" %}
+
+{% block blueimp_upload_widget %}
+
+    {# {{ dump(form.vars) }} #}
+    <div class="form-group">
+    <div id="{{ form.vars.name }}-fileupload" class="fileupload" data-url="{{ path('parabol_uploader') }}" >
+        <div class="row">
+            <div class="col-lg-12">
+                {% if form.vars.attr.error is defined %}
+                <span class="help-block error files-error hidden"><ul class="list-unstyled"><li><span class="glyphicon glyphicon-exclamation-sign"></span> {{ form.vars.attr.error }}</li></ul></span>
+                {% endif %}
+                {% if form.vars.description == 'default' %}
+                    <p><small class="help-block">{% trans %}Dodane zdjęcia można przeciągać aby zmienić ich kolejność lub ich przeznaczenie.{% endtrans %}</small></p>
+                {% elseif form.vars.description is not empty %}
+                    <p><small class="help-block">{{ form.vars.description | trans }}</small></p>
+                {% endif %}  
+            </div>
+        </div>
+        <div class="row">
+        <div class="col-lg-2 col-md-3 col-md-4">
+    	<span class="btn btn-primary fileinput-button">
+            <i class="glyphicon glyphicon-plus"></i> 
+            &nbsp;<span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
+            <!-- The file input field used as target for the file upload widget -->
+            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ '/edit' in app.request.pathInfo ? 'edit' : 'new' }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" />
+        </span>
+        </div>
+
+        
+        
+
+        <div class="col-sm-8 fileupload-progress fade">
+                <!-- The global progress bar -->
+                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+                </div>
+                <!-- The extended global progress state -->
+                <div class="progress-extended">&nbsp;</div>
+        </div>
+        </div>
+        
+        <!-- The table listing the files available for upload/download -->
+        <div class="row">
+
+            <div role="presentation" class="col-lg-12 file-list">
+                {% if form.vars.attr.labels is defined %}
+                    {% for label in form.vars.attr.labels %}
+                    <span class="label hidden">{{ label }}</span>
+                    {% endfor %}
+                {% endif %}
+                <ul id="{{ form.vars.name }}-fileupload-files" class="files"></ul>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% verbatim %}   
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <div class="btn btn-default template-upload fade">      
+            <span class="preview"></span>
+            
+            
+            <div style="white-space: normal; text-align:center; margin-top: 33%;"><span class="error"></span></div>
+            
+            {% if (!i && !o.options.autoUpload) { %}
+                <button class="btn btn-primary btn-xs start"  style="position: absolute; top: 30px; right: 5px;">
+                    <i class="glyphicon glyphicon-upload"></i>
+                </button>
+            {% } %}
+            {% if (!i) { %}
+                <button class="btn btn-danger btn-xs cancel" style="position: absolute; top: 5px; right: 5px;">
+                    <i class="glyphicon glyphicon-trash"></i>
+                </button>
+            {% } %}
+    </div>
+{% } %}
+{% endverbatim %} 
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% verbatim %}   
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+{% endverbatim %}   
+    <li class="btn btn-default template-download" {{ form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : '' }}
+{% verbatim %}   
+    data-file="{%=file.url%}" data-width="{%=file.width%}" data-height="{%=file.height%}" data-id="{%=file.id%}" data-sort="{%=file.sort%}"> 
+         <input type="hidden" name="uploaded_files[]" value="{%=file.id%}" />
+         <div style="position: relative">        
+            
+                {% if (file.thumbnailUrl) { %}
+                <span class="preview" style="background-image: url({%=file.thumbnailUrl%});">
+                    
+                </span>
+                {% } %}
+                {% if (file.width) { %}
+                <small class="sizes">{%=file.width%}px x {%=file.height%}px</small>
+                {% } %}
+            {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+            <div style="position: absolute; top: 5px; right: 5px;">
+            {% if (file.thumbnailUrl) { %}
+                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\AdminCoreBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
+                    <i class="ion ion-edit"></i>
+                </button>
+{% endverbatim %}                 
+                {% if form.vars.class is empty %}
+                <button class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px"  onclick="return $(this).admin_core_showCropper();" >
+                    <i class="fa fa-crop"></i>
+                </button>
+                {% endif %}
+{% verbatim %}                   
+                {% if (file.deleteUrl) { %}
+                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                    <i class="ion ion-trash-b"></i>
+                </button>
+                {% } %}    
+            {% } else { %}
+                <button class="btn btn-danger btn-xs cancel" style="margin-left: 4px;">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </button>
+            {% } %}
+            </div>
+        </div>
+    </li>
+{% } %}
+</script>
+{% endverbatim %}
+<style>
+    {% if form.vars.class == null %}
+    #{{ form.vars.name }}-fileupload button.edit { display: none; }
+    {% endif %}
+</style>
+{% endblock blueimp_upload_widget %}
