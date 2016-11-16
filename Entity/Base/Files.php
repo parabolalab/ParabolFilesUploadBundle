@@ -6,8 +6,8 @@ namespace Parabol\FilesUploadBundle\Entity\Base;
 
 trait Files {
 
-	private $files;
-    private $filesUpdatedAt;
+	protected $files;
+    protected $filesUpdatedAt;
 
     public function addFile(\Parabol\FilesUploadBundle\Entity\File $file, $context = 'files')
     {
