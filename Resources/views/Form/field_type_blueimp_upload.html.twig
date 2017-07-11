@@ -149,9 +149,9 @@
 
     if(typeof cropperSetting != 'object') var cropperSetting = {}
     cropperSetting['{{ form.vars.name }}-fileupload'] = {
-        'aspectRatio': '{{ form.vars.cropper.aspectRatio is defined ? form.vars.cropper.aspectRatio : 'none' }}',
-        'minCropBoxWidth': {{ form.vars.cropper.minCropBoxWidth is defined ? form.vars.cropper.minCropBoxWidth : 0 }},
-        'minCropBoxHeight': {{ form.vars.cropper.minCropBoxHeight is defined ? form.vars.cropper.minCropBoxHeight : 0 }}
+        'aspectRatio': '{{ form.vars.cropper.aspectRatio is defined ? form.vars.cropper.aspectRatio : '' }}',
+        'minCropBoxWidth': {{ form.vars.cropper.minCropBoxWidth is defined ? form.vars.cropper.minCropBoxWidth : 100 }},
+        'minCropBoxHeight': {{ form.vars.cropper.minCropBoxHeight is defined ? form.vars.cropper.minCropBoxHeight : 100 }}
     }
  
 </script>
@@ -248,7 +248,7 @@
 <style>
 
 #cropper {
-    position: fixed; height: 100%; width: 100%; top: 0; left: 0; display: none; background: #111; z-index: 1000;
+    position: fixed; height: 100%; width: 100%; top: 0; left: 0; display: none; background: #111; z-index: 10000;
 }
 
 #cropper .image-container {
@@ -393,6 +393,7 @@ cropperSetting[fileuploadId].minCropBoxHeight)
                           minCropBoxHeight: cropperSetting[fileuploadId].minCropBoxHeight,
                           zoomOnTouch: false,
                           zoomOnWheel: false,
+                          dragMode: 'crop',
                           crop: function(e) {
         
                             $('#cropper > .stats').html(parseInt(e.detail.width) + 'px x ' + parseInt(e.detail.height) + 'px');
