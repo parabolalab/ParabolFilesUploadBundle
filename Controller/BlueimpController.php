@@ -110,7 +110,7 @@ class BlueimpController extends Controller
                     );    
                 }
                 
-                $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment());  
+                $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment(), null, null, $f->getPath());  
 
             }
             else
@@ -151,7 +151,7 @@ class BlueimpController extends Controller
         }
         
         $response = new JsonResponse();
-        $response->setData(array('files' => $data, 'dev' => $dev));
+        $response->setData(array('files' => $data));
         
         return $response;   
     }

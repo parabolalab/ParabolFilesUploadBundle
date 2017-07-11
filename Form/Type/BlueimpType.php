@@ -34,7 +34,6 @@ class BlueimpType extends AbstractType
     {
         parent::buildView($view, $form, $options);
 
-
         $view->vars['description'] = $options['description'];
         $view->vars['attr']['multiple'] = call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']);
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];

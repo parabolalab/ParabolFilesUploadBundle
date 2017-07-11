@@ -148,13 +148,20 @@ class FileRelationSubscriber implements EventSubscriber
             $refClass = new \ReflectionClass($inserted);
 
             // var_dump($refClass);
+
+
+
             if($this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
             {
+
                 $class = $refClass->name;
                 $this->object = $inserted;
+
+
                 foreach($this->object->getFilesContexts() as $context)
                 {
-                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => '_'.hash('sha256', $this->container->get('session')->getId().'|'.$class), 'class' => $class, 'context' => $context, 'isNew' => true));                
+                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => '_'.hash('sha256', $this->container->get('session')->getId().'|'.$class), 'class' => $class, 'context' => $context, 'isNew' => true));  
+
                     $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
                 }
 
@@ -162,9 +169,8 @@ class FileRelationSubscriber implements EventSubscriber
             
         }
 
-        // var_dump($this->files);
 
-        // die();
+
 
         foreach ($uow->getScheduledEntityUpdates() as $updated) {
             $refClass = new \ReflectionClass($updated);
@@ -184,12 +190,18 @@ class FileRelationSubscriber implements EventSubscriber
             	if(isset($changeSet['path']))
             	{
             		$web_dir = $this->container->get('parabol.utils.path')->getWebDir();	
+                    
                     if(file_exists($web_dir . $changeSet['path'][0]))
                     {
                 		$dir = $web_dir . dirname($changeSet['path'][1]);
                 		if(!file_exists($dir)) mkdir($dir, 0777, true);
+
+                        $oldCropped = preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][0]);
+                        if(file_exists($web_dir . $oldCropped)) rename($web_dir . $oldCropped, $web_dir .  preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][1]));
                 		rename($web_dir . $changeSet['path'][0], $web_dir . $changeSet['path'][1]);
+
                     }
+
             	}
             	
 	    	}
