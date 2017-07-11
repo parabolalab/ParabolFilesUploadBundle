@@ -18,11 +18,17 @@ class BlueimpController extends Controller
 
         $class = $request->get('class');
         $context = $request->get('context');
-        $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $context);
+        $path = trim($request->get('path') ? $request->get('path') : $context, '/');
+        $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path);
         
         if(!file_exists($dir)) mkdir($dir, 0777, true);
 
+
+
+
         $files = (array)$request->files->get($context);
+        $dev = [];
+
         $data = array();
 
         $obj = null;
@@ -34,72 +40,110 @@ class BlueimpController extends Controller
                 ;
         }
 
+
+
+
         foreach($files as $file)
         {
             
+
             $orgName = $slugizedName  = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $file->getClientOriginalName())) . '.'. strtolower($file->getClientOriginalExtension());
             
-            $i = 1;
-           
-            while(file_exists($dir . DIRECTORY_SEPARATOR . $slugizedName))
-            {
-                $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
-                $i++;
-            }
-
-            $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $context, DIRECTORY_SEPARATOR).$slugizedName;    
-
-
-            $f = new File();
-            $f->setPath($path); 
-            $f->setContext($context); 
-            $f->setMimeType($file->getMimeType() == 'text/plain' && strtolower($file->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $file->getMimeType());
-            if($f->isImage())
-            {
-                list($width, $height) = getimagesize($file->getPathname());
-                $f->setWidth($width);
-                $f->setHeight($height);
-            }
             
-            if($class) $f->setClass($class);
-            if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
-
-            $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
-
-            $file->move($dir, $slugizedName);
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($f);
 
-            if($obj) $obj->addFile($f, $context);
-
-            if($class && !$class::allowMultipleFiles() && $request->get('ref'))
+            if($context !== 'cropper')
             {
-                $oldFile = $em->getRepository('ParabolAdminCoreBundle:File')->findOneBy(array('ref' => $request->get('ref'), 'class' => $class));
-                if($oldFile)
+                $i = 1;
+           
+                while(file_exists($dir . DIRECTORY_SEPARATOR . $slugizedName))
                 {
-                    $em->remove($oldFile);
+                    $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
+                    $i++;
                 }
-            }
 
-            $em->flush();
-           
-           
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
 
-            if($f->isImage())
-            {
-                $imagemanagerResponse = $this->container
-                ->get('liip_imagine.controller')
-                    ->filterAction(
-                        $request,
-                        $path,
-                        'admin_thumb'
-                );    
+                $f = new File();
+                $f->setPath($path); 
+                $f->setContext($context); 
+                $f->setMimeType($file->getMimeType() == 'text/plain' && strtolower($file->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $file->getMimeType());
+                if($f->isImage())
+                {
+                    list($width, $height) = getimagesize($file->getPathname());
+                    $f->setWidth($width);
+                    $f->setHeight($height);
+                }
+            
+                if($class) $f->setClass($class);
+                if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
+
+                $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
+
+                $file->move($dir, $slugizedName);
 
                 
+                $em->persist($f);
+
+                if($obj) $obj->__addFile($f, $context);
+
+                if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref'))
+                {
+                    $oldFile = $em->getRepository('ParabolFilesUploadBundle:File')->findOneBy(array('ref' => $request->get('ref'), 'class' => $class, 'context' => $context));
+                    if($oldFile)
+                    {
+                        $em->remove($oldFile);
+                    }
+                }
+
+                $em->flush();
+
+                if($f->isImage())
+                {
+                    $imagemanagerResponse = $this->container
+                    ->get('liip_imagine.controller')
+                        ->filterAction(
+                            $request,
+                            $path,
+                            'admin_thumb'
+                    );    
+                }
+                
+                $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment());  
+
             }
-            
-            $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment());         
+            else
+            {
+                $dev['file'] = $request->get('orginalFilePath');
+
+                $file->move($dir, $slugizedName);
+
+                $dev['file_moved'] = true;
+
+                if($request->get('orginalFilePath') && $request->get('cropperBoxData') !== null)
+                {
+                    $params = [
+                        'cropData' => $request->get('cropperBoxData'),
+                        'path' => $request->get('orginalFilePath'),
+                    ];
+
+                    $em
+                    ->createQueryBuilder()
+                    ->update('ParabolFilesUploadBundle:File', 'f')
+                    ->set('f.cropBoxData', ':cropData')
+                    ->where('f.path = :path')
+                    ->setParameters($params)
+                    ->getQuery()
+                    ->execute();
+
+                    $dev['file_updated'] = true;
+                }
+            }
+           
+           
+
+                   
             
             
 
@@ -107,7 +151,7 @@ class BlueimpController extends Controller
         }
         
         $response = new JsonResponse();
-        $response->setData(array('files' => $data));
+        $response->setData(array('files' => $data, 'dev' => $dev));
         
         return $response;   
     }
@@ -125,7 +169,7 @@ class BlueimpController extends Controller
         if($request->query->get('type') == 'edit')
         {
             // var_dump('edit', $params['hash']);
-            $oldFiles = $em->getRepository('ParabolAdminCoreBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
+            $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
             foreach($oldFiles as $oldFile)
             {
                 $em->remove($oldFile);
@@ -141,7 +185,7 @@ class BlueimpController extends Controller
         
 
         $files = $em
-                ->getRepository('ParabolAdminCoreBundle:File')
+                ->getRepository('ParabolFilesUploadBundle:File')
                 ->createQueryBuilder('f')
                 ->where('f.class = :class')
                 ->andWhere('f.context = :context')
@@ -156,7 +200,7 @@ class BlueimpController extends Controller
         {
 
             $bluimpFile = new BlueimpFile($this->get('parabol.utils.path')->getWebDir().$file->getPath(), $this->container->get('kernel')->getEnvironment());
-            $result[] = $bluimpFile->toArray($file->getMimeType() == 'image/svg+xml' ? $file->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($file->getPathForThumb(), 'admin_thumb'), $file->getId(), $file->getSort(), $file->getWidth(), $file->getHeight());            
+            $result[] = $bluimpFile->toArray($file->getMimeType() == 'image/svg+xml' ? $file->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($file->getPathForThumb(), 'admin_thumb'), $file->getId(), $file->getSort(), $file->getWidth(), $file->getHeight(), null, $file->getCropBoxData());            
             
         }
 
@@ -169,7 +213,7 @@ class BlueimpController extends Controller
     public function deleteAction(Request $request)
     {
         $file = $this->getDoctrine()
-                ->getRepository('ParabolAdminCoreBundle:File')
+                ->getRepository('ParabolFilesUploadBundle:File')
                 ->createQueryBuilder('f')
                 ->where('f.id = :id')
                 ->setParameter(':id', $request->get('id'))
@@ -191,7 +235,7 @@ class BlueimpController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $file = $em
-                ->getRepository('ParabolAdminCoreBundle:File')
+                ->getRepository('ParabolFilesUploadBundle:File')
                 ->find($request->get('id'));
         
         if (!$file) {

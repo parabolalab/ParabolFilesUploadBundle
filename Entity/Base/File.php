@@ -14,6 +14,11 @@ trait File {
         return isset($this->files[0]) ? $this->files[0] : new \Parabol\FilesUploadBundle\Entity\File();
     }
 
+    public static function multipleFileAllow()
+    {
+        return ['files' => false];
+    }
+
 }
 
 ?>

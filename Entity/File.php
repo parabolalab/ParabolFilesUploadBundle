@@ -111,6 +111,11 @@ class File extends BaseEntity
       */
     private $height;
 
+     /**
+      * @ORM\Column(name="cropBoxData", type="json_array", nullable=true)
+      */
+    private $cropBoxData;
+
 
     public function __construct() {
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
@@ -157,6 +162,11 @@ class File extends BaseEntity
     public function getPath()
     {
         return $this->path;
+    }
+
+    public function getCroppedPath()
+    {
+        return $this->getCropBoxData() ? preg_replace('/(\.[\w\d]{3})/', '-cropped$1', $this->path) : $this->path;
     }
 
     /**
@@ -610,5 +620,29 @@ class File extends BaseEntity
     public function getHeight()
     {
         return $this->height;
+    }
+
+    /**
+     * Set cropBoxData
+     *
+     * @param integer $cropBoxData
+     *
+     * @return File
+     */
+    public function setCropBoxData($cropBoxData)
+    {
+        $this->cropBoxData = $cropBoxData;
+
+        return $this;
+    }
+
+    /**
+     * Get cropBoxData
+     *
+     * @return integer
+     */
+    public function getCropBoxData()
+    {
+        return $this->cropBoxData;
     }
 }

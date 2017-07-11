@@ -10,21 +10,15 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Knp\DoctrineBehaviors\ORM\AbstractSubscriber;
 
-class FileRelationSubscriber extends AbstractSubscriber
+class FileRelationSubscriber implements EventSubscriber
 {
 
-	private $container, $files = [], $object;
+	private $container, $analizer, $files = [], $object;
 
-	public function __construct($container)
+	public function __construct($container, $analizer)
 	{
 
-        try
-        {
-           $analizer =  $container->get('parabol.class_analyzer');
-           parent::__construct($analizer, false);
-        }
-        catch(\Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException $e){}
-        
+        $this->analizer = $analizer;
 		$this->container = $container;
 
 	}
@@ -50,15 +44,12 @@ class FileRelationSubscriber extends AbstractSubscriber
         // the $metadata is the whole mapping info for this class
         $metadata = $args->getClassMetadata();
 
-        if (!method_exists($metadata->getName(), 'allowMultipleFiles')) {
+        if (!method_exists($metadata->getName(), 'fileContexts')) {
             return;
         }
 
         $class = $metadata->getName();
-        $multipleFiles = $class::allowMultipleFiles();
-
-        // die();
-
+       
         $namingStrategy = $args
             ->getEntityManager()
             ->getConfiguration()
@@ -72,7 +63,9 @@ class FileRelationSubscriber extends AbstractSubscriber
             'nullable' => true
         ));
 
-        foreach($class::fileContexts() as $context)
+        $contexts = array_keys($class::fileContexts());
+
+        foreach($contexts as $context)
         {
 
             $metadata->mapManyToMany(array(
@@ -153,11 +146,13 @@ class FileRelationSubscriber extends AbstractSubscriber
 
         foreach ($uow->getScheduledEntityInsertions() as $inserted) {
             $refClass = new \ReflectionClass($inserted);
-            if($this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
+
+            // var_dump($refClass);
+            if($this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
             {
                 $class = $refClass->name;
                 $this->object = $inserted;
-                foreach($class::fileContexts() as $context)
+                foreach($this->object->getFilesContexts() as $context)
                 {
                     $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => '_'.hash('sha256', $this->container->get('session')->getId().'|'.$class), 'class' => $class, 'context' => $context, 'isNew' => true));                
                     $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
@@ -167,13 +162,17 @@ class FileRelationSubscriber extends AbstractSubscriber
             
         }
 
+        // var_dump($this->files);
+
+        // die();
+
         foreach ($uow->getScheduledEntityUpdates() as $updated) {
             $refClass = new \ReflectionClass($updated);
-            if($this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
+            if($this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
 	    	{
                 $class = $refClass->name;
                 $this->object = $updated;
-                foreach($class::fileContexts() as $context)
+                foreach($this->object->getFilesContexts() as $context)
                 {
                     $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context, 'isNew' => true));
                 }
@@ -199,7 +198,7 @@ class FileRelationSubscriber extends AbstractSubscriber
 
         foreach ($uow->getScheduledEntityDeletions() as $deleted) {
             $refClass = new \ReflectionClass($deleted);
-            if(empty($this->files) && $this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->getClassAnalyzer()->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
+            if(empty($this->files) && $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
             {
 
                 $files = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $deleted->getId(), 'class' => get_class($deleted)));

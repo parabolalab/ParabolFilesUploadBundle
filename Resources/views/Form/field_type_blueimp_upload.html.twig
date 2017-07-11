@@ -10,9 +10,9 @@
                 {% if form.vars.attr.error is defined %}
                 <span class="help-block error files-error hidden"><ul class="list-unstyled"><li><span class="glyphicon glyphicon-exclamation-sign"></span> {{ form.vars.attr.error }}</li></ul></span>
                 {% endif %}
-                {% if form.vars.description == 'default' %}
+                {% if form.vars.description == 'default' and form.vars.attr.multiple  %}
                     <p><small class="help-block">{% trans %}Dodane zdjęcia można przeciągać aby zmienić ich kolejność lub ich przeznaczenie.{% endtrans %}</small></p>
-                {% elseif form.vars.description is not empty %}
+                {% elseif form.vars.description is not empty and form.vars.description != 'default' %}
                     <p><small class="help-block">{{ form.vars.description | trans }}</small></p>
                 {% endif %}  
             </div>
@@ -105,15 +105,24 @@
             {% } %}
             <div style="position: absolute; top: 5px; right: 5px;">
             {% if (file.thumbnailUrl) { %}
-                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\AdminCoreBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
+                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
                     <i class="ion ion-edit"></i>
                 </button>
-{% endverbatim %}                 
-                {% if form.vars.class is empty %}
-                <button class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px"  onclick="return $(this).admin_core_showCropper();" >
+{% endverbatim %}     
+
+                <button  
+                {% verbatim %}
+                    data-width="{%=file.width%}" 
+                    data-height="{%=file.height%}" 
+                    data-crop-width="{%=file.cropBoxData.width%}" 
+                    data-crop-height="{%=file.cropBoxData.height%}" 
+                    data-crop-left="{%=file.cropBoxData.left%}" 
+                    data-crop-top="{%=file.cropBoxData.top%}" 
+                {% endverbatim %}
+                class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px"  onclick="return $(this).admin_core_showCropper($(this));" >
                     <i class="fa fa-crop"></i>
                 </button>
-                {% endif %}
+                
 {% verbatim %}                   
                 {% if (file.deleteUrl) { %}
                 <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
@@ -130,10 +139,495 @@
     </li>
 {% } %}
 </script>
+
+
+
+
 {% endverbatim %}
+
+<script>
+
+    if(typeof cropperSetting != 'object') var cropperSetting = {}
+    cropperSetting['{{ form.vars.name }}-fileupload'] = {
+        'aspectRatio': '{{ form.vars.cropper.aspectRatio is defined ? form.vars.cropper.aspectRatio : 'none' }}',
+        'minCropBoxWidth': {{ form.vars.cropper.minCropBoxWidth is defined ? form.vars.cropper.minCropBoxWidth : 0 }},
+        'minCropBoxHeight': {{ form.vars.cropper.minCropBoxHeight is defined ? form.vars.cropper.minCropBoxHeight : 0 }}
+    }
+ 
+</script>
+
+
 <style>
-    {% if form.vars.class == null %}
+    {% if form.vars.cropper %}
     #{{ form.vars.name }}-fileupload button.edit { display: none; }
+    {% else %}
+    #{{ form.vars.name }}-fileupload button.crop { display: none; }
     {% endif %}
+
+
 </style>
+
+{% if form.vars.cropper and form.vars.cropperAssigned == false %}
+
+
+<div id="cropper">
+    <img src="/bundles/parabolbase/images/preloaders/loading-spin.svg" class="spin-loader" >
+    <div class="stats"></div>
+    <div class="btn-close"><i class="fa fa-times-circle fa-lg"></i></div>
+  <div class="image-container" >
+    <img id="image" src="">
+  </div>
+  <div class="cropper-bar" style="margin-left: -43px;">
+    {# <i class="fa fa-arrows"></i> #}
+    <i class="fa fa-crop active"></i>
+    {# <i class="fa fa-arrows-alt"></i> #}
+    {# <i class="fa fa-search-minus"></i>
+    <i class="fa fa-search-plus"></i> #}
+  {#   <i class="fa fa-undo"></i>
+    <i class="fa fa-repeat"></i> #}
+    <i class="fa fa-arrows-h"></i>
+    <i class="fa fa-arrows-v"></i>
+    <i class="fa fa-save"></i>
+  </div>
+
+    <div class="modal fade" id="cropperResizeImage" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="{% trans %}Close{% endtrans %}"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">{% trans %}Resize Image{% endtrans %}</h4>
+          </div>
+          <div class="modal-body">
+            <img src="/bundles/parabolbase/images/preloaders/loading-spin-dark.svg" class="spin-loader" >
+            <form class="form-inline">
+                <input type="hidden" name="id" value="" />
+                <div class="row">
+              <div class="form-group col-xs-6">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="width" id="resize_width" placeholder="{% trans %}width{% endtrans %}">
+                  <div class="input-group-addon">px</div>
+                </div>
+              </div>
+              
+              <div class="form-group col-xs-6">
+                <span class="x">&times;</span>
+                <div class="input-group">
+                  <input type="text" class="form-control" name="height" id="resize_height" placeholder="{% trans %}height{% endtrans %}">
+                  <div class="input-group-addon">px</div>
+                </div>
+              </div>
+              </div>
+              <div class="row">
+                  <div class="checkbox col-xs-12">
+                    <label>
+                      <input type="checkbox" name="proportion" value="1" checked="checked"> {% trans %}Constrain Proportions{% endtrans %}
+                    </label>
+                  </div>
+              </div>
+              {# <div class="row">
+                  <div class="checkbox col-xs-12">
+                    <label>
+                      <input type="checkbox" name="override" value="1" checked="checked"> {% trans %}Override the File{% endtrans %}
+                    </label>
+                  </div>
+              </div> #}
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+            <button type="button" class="btn btn-primary" data-action="{#{ path('parabol_uploader_resize') }#}">{% trans %}Resize{% endtrans %}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<link  href="/admin/components/cropperjs/dist/cropper.css" rel="stylesheet">
+
+<style>
+
+#cropper {
+    position: fixed; height: 100%; width: 100%; top: 0; left: 0; display: none; background: #111; z-index: 1000;
+}
+
+#cropper .image-container {
+    max-width: 100%; max-height: 100%;
+}
+#cropper .image-container img {
+    max-width: 100%;
+}
+#cropper .fa {
+    color: #fff;
+    cursor: pointer;
+}
+
+#cropper .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10000;
+}
+
+#cropper .stats {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    color: #fff;
+    padding: 3px 5px;
+}
+
+#cropper .cropper-bar {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 0 2px;
+    left: 50%;
+    bottom: 50px;
+    margin-left: -100px;
+}
+
+#cropper .cropper-bar .fa {
+    padding: 5px 4px;
+}
+
+#cropper .cropper-bar .fa.active {
+    background: #00b0eb;
+}
+
+#cropper .spin-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    margin-top: -15px;
+    margin-left: -15px;
+}
+#cropper .cropper-bar .fa:hover {
+    color: #2ecbff;
+}
+
+#thumbs-container .control-label {
+    display: none;
+}
+
+#cropperResizeImage .x {
+    position: absolute;
+    color: #444;
+    left: -4px;
+    top: 5px;
+    font-size: 18px;
+}
+
+
+
+</style>
+
+<script src="/admin/components/cropperjs/dist/cropper.js"></script>
+
+<script type="text/javascript">
+
+
+
+    var iCheckProp = false
+
+    // $(document).ready(function(){
+
+
+    //     setTimeout(function(){
+
+    //         iCheckProp = $('#cropperResizeImage input[name=proportion]').parent('.icheckbox_minimal').length
+
+    //         if(iCheckProp)
+    //         {
+    //             $('#cropperResizeImage input[name=proportion]').change(function(){
+    //                 if($(this).is(':checked')) $('#cropperResizeImage input[name=width]').trigger('proportion:on')
+    //             })
+    //         }
+    //     }, 200)
+    // })
+    
+
+    var cropper = null; 
+    var parabolFileBrowserImage = null;
+    var $parabolFileBrowserCurrent = null;
+    var parabolFileBrowserPreventCKEditroAction = false;
+    var $corpperContainer = $('#cropper');
+
+
+    var defaultScale = 1;
+
+    (function ( $ ) {
+
+        $.fn.admin_core_showCropper = function ($btn) {
+
+                    parabolFileBrowserPreventCKEditroAction = true;
+
+                    $parabolFileBrowserCurrent = $(this).closest('li')
+
+                    if(parabolFileBrowserImage) parabolFileBrowserImage.src = ''    
+                    
+                    
+                    $corpperContainer.css({top: -$(window).height(), display: 'block'})
+                    $corpperContainer.find('.spin-loader').fadeIn()
+                    $corpperContainer.animate({'top': 0})   
+
+                    var newImg = new Image;
+                    newImg.onload = function() {
+                
+                        parabolFileBrowserImage = document.getElementById('image');
+                        parabolFileBrowserImage.src = this.src
+                        
+                        $('#cropper > .image-container').css({'width': $parabolFileBrowserCurrent.data('width'), height: $parabolFileBrowserCurrent.data('height')})
+                        
+                        // console.log('set ration', {{ form.vars.cropper.aspectRatio is defined ? form.vars.cropper.aspectRatio : 'NaN' }})
+
+                        var fileuploadId = $btn.closest('.fileupload').attr('id')
+ 
+                        console.log(cropperSetting[fileuploadId].aspectRatio,
+cropperSetting[fileuploadId].minCropBoxWidth,
+cropperSetting[fileuploadId].minCropBoxHeight)
+
+                        cropper = new Cropper(parabolFileBrowserImage, {
+                          aspectRatio: cropperSetting[fileuploadId].aspectRatio,
+                          minCropBoxWidth: cropperSetting[fileuploadId].minCropBoxWidth,
+                          minCropBoxHeight: cropperSetting[fileuploadId].minCropBoxHeight,
+                          zoomOnTouch: false,
+                          zoomOnWheel: false,
+                          crop: function(e) {
+        
+                            $('#cropper > .stats').html(parseInt(e.detail.width) + 'px x ' + parseInt(e.detail.height) + 'px');
+                
+                          }
+                        })
+
+                        var data = {}
+
+                        data.width = $btn.data().cropWidth ? $btn.data().cropWidth : $btn.data().width;
+                        data.height = $btn.data().cropHeight ? $btn.data().cropHeight : $btn.data().height;
+                        data.left = $btn.data().cropLeft ? $btn.data().cropLeft : 0;
+                        data.top = $btn.data().cropTop ? $btn.data().cropTop : 0;
+                        
+
+                        setTimeout(function(){cropper.setCropBoxData(data)}, 100);
+                        
+                        parabolFileBrowserImage.addEventListener('ready', function () {
+                            
+                            var $container = $('#cropper > .image-container > .cropper-container');
+                            $container.css({
+                                'margin-left': $('#cropper').width() > $container.width() ? ($('#cropper').width() - $container.width()) / 2 : 0,
+                                'margin-top': $('#cropper').height() > $container.height() ? ($('#cropper').height() - $container.height()) / 2 : 0
+                            })
+                        })
+                        
+
+                        $corpperContainer.find('.spin-loader').fadeOut()
+                        
+                    }
+
+                    newImg.src = $parabolFileBrowserCurrent.data('file');
+
+                    return false;
+
+            }
+
+    }( jQuery ));
+
+    
+
+    $('#cropperResizeImage input[type=text]').keydown(function(e){
+        var allowedKeyCodes = [8,37,39,46,48,49,50,51,52,53,54,55,56,57]
+        if(allowedKeyCodes.indexOf(e.keyCode) == -1) e.preventDefault()
+    })
+
+    $('#cropperResizeImage input[type=text]').keyup(function(e){
+        var allowedKeyCodes = [8,46,48,49,50,51,52,53,54,55,56,57]
+        if(allowedKeyCodes.indexOf(e.keyCode) > -1 && (iCheckProp && $('#cropperResizeImage input[name=proportion]').parent('.icheckbox_minimal.checked').length || $('#cropperResizeImage input[name=proportion]').is(':checked')))
+        {
+            $(this).trigger('proportion:on')
+        }
+    })
+    
+    $('#cropperResizeImage input[name=width], #cropperResizeImage input[name=height]').on('proportion:on', calculateSize)
+
+    function calculateSize(event)
+    {
+        if($(this).val() != '')
+        {
+            if($(this).attr('name') == 'width') $('#cropperResizeImage input[name=height]').val(Math.round($(this).val() / defaultScale));
+            else $('#cropperResizeImage input[name=width]').val(Math.round($(this).val() * defaultScale));
+        }
+    }
+
+
+    function getUrlParam( paramName ) {
+            var reParam = new RegExp( '(?:[\?&]|&)' + paramName + '=([^&]+)', 'i' );
+            var match = window.location.search.match( reParam );
+
+            return ( match && match.length > 1 ) ? match[1] : null;
+    }
+
+
+    function browser_removeFile($btn){
+            
+            parabolFileBrowserPreventCKEditroAction = true
+            $li = $btn.closest('li')
+            $.get($btn.data('url'), function(data){
+                $li.remove()
+                parabolFileBrowserPreventCKEditroAction = false
+            })
+            return false
+        
+    }
+
+    function addFileToCkeditor(obj)
+    {
+        if(parabolFileBrowserPreventCKEditroAction) return;
+        
+        window.opener.CKEDITOR.tools.callFunction( getUrlParam( 'CKEditorFuncNum' ), $(obj).data('file') );
+        window.close()
+    }
+
+    function cropperClose()
+    {
+        $('#cropperResizeImage').modal('hide')
+        $('#cropper').animate({'top': -$(window).height() })
+        document.getElementById('image').src = ''
+        if(cropper) cropper.destroy()
+        parabolFileBrowserPreventCKEditroAction = false;
+    }
+
+
+    $('#cropperResizeImage .btn-primary').click(function(){
+        if(cropper) cropper.disable()
+        $('#cropperResizeImage').modal('hide')
+        $corpperContainer.find('.spin-loader').fadeIn()
+
+        $.post($(this).data('action'), $('#cropperResizeImage form').serialize(), function(data){
+            addThumb(data)
+            if(cropper) cropper.enable()
+            cropperClose()
+        })
+        
+
+    });
+
+    $('#cropper .btn-close').click(function(){
+        cropperClose()
+    })
+
+
+
+
+    $('#cropper .fa-arrows').click(function(){
+        cropper.setDragMode('move');
+        $('#cropper .fa-crop').removeClass('active')
+        $('#cropper .fa-arrows').addClass('active')
+    })
+    
+    $('#cropper .fa-crop').click(function(){
+        cropper.setDragMode('crop');
+        $('#cropper .fa-arrows').removeClass('active')
+        $('#cropper .fa-crop').addClass('active')
+    })
+
+    $('#cropper .fa-arrows-v').click(function(){
+        cropper.scaleY(cropper.getImageData().scaleY * -1);
+    })
+    
+    $('#cropper .fa-arrows-h').click(function(){
+        cropper.scaleX(cropper.getImageData().scaleX * -1);
+    })
+
+    $('#cropper .fa-search-plus').click(function(){
+        cropper.zoom(0.1);
+    })
+    
+    $('#cropper .fa-search-minus').click(function(){
+        cropper.zoom(-0.1);
+    })
+    $('#cropper .fa-repeat').click(function(){
+        cropper.rotate(10);
+    })
+    
+    $('#cropper .fa-undo').click(function(){
+        cropper.rotate(-10);
+    })
+
+    $('#cropper .fa-arrows-alt').click(function(){
+
+        $('#cropperResizeImage input[name=id]').val($parabolFileBrowserCurrent.data('id'));
+        $('#cropperResizeImage input[name=width]').val($parabolFileBrowserCurrent.data('width'));
+        $('#cropperResizeImage input[name=height]').val($parabolFileBrowserCurrent.data('height'));
+        defaultScale = $parabolFileBrowserCurrent.data('width') / $parabolFileBrowserCurrent.data('height')
+        if(iCheckProp)
+        {
+            $('#cropperResizeImage input[name=proportion]').iCheck('check')
+            $('#cropperResizeImage input[name=override]').iCheck('check')
+        } 
+        else
+        {
+            $('#cropperResizeImage input[name=proportion]').attr('checked', true)
+            $('#cropperResizeImage input[name=override]').attr('checked', true)
+        } 
+        $('#cropperResizeImage').modal({backdrop: false})
+    })
+
+    $('#cropper .fa-save').click(function(){
+
+        // alert(parabolFileBrowserImage.src.substr(0,parabolFileBrowserImage.src.length-4).replace(window.location.origin, '')+'_cropped.' + parabolFileBrowserImage.src.substr(-3))
+        //new String(parabolFileBrowserImage.src).replace(/.*\//g, '').replace(/(\.[\w]+)$/, '-'+parseInt(cropper.getCropBoxData().width)+'x'+parseInt(cropper.getCropBoxData().height) + '$1')
+        // return false;
+
+
+        $corpperContainer.find('.spin-loader').fadeIn()
+
+        cropper.getCroppedCanvas().toBlob(function (blob) {
+          var filename = new String(parabolFileBrowserImage.src).replace(/.*\//g, '').replace(/(\.[\w]+)$/, '-cropped' + '$1');
+          var formData = new FormData();
+          formData.append('context', 'cropper');
+          formData.append('cropperBoxData', JSON.stringify(cropper.getCropBoxData()));
+          formData.append('orginalFilePath', parabolFileBrowserImage.src.replace(window.location.origin, ''));
+          formData.append('path', parabolFileBrowserImage.src.replace(window.location.origin + '/uploads', '').match( /.*\// ));
+          formData.append('cropper[]', blob, filename);
+
+          
+          // Use `jQuery.ajax` method
+          $.ajax(sf_env + '/_uploader/upload', {
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function (data) {
+                
+                addThumb(data)
+                cropperClose()
+            },
+            error: function () {
+              console.log('Upload error');
+            }
+          });
+        });
+    })
+
+    function addThumb(data)
+    {
+        $('.file-list ul.files').prepend(tmpl('template-download', data));
+        fixThumbView()
+    }
+
+    function fixThumbView()
+    {
+        if(typeof(parabol_file_browser_maxPerPage) == 'number')
+        {
+                if($('.file-list ul.files > li').length > parabol_file_browser_maxPerPage) $('.file-list ul.files > li:' + ($('#filebrowser-fileuploadInput').data('order') == 'desc' ? 'last' : 'first') + '-child').remove();
+        }
+    }
+
+</script>
+{# {% set form.devCropper = true %} #}
+{# {{ dump(form) }} #}
+
+{% endif %}
+
 {% endblock blueimp_upload_widget %}

@@ -26,12 +26,12 @@ class BlueimpFile extends UploadedFile
         return $this;
     }
 
-	public function toArray($thumb, $sort, $id, $width, $height, $allowed_remove_pattern = null)
+	public function toArray($thumb, $sort, $id, $width, $height, $allowed_remove_pattern = null, $crop_box_data = null)
 	{
-       return self::__toArray($thumb, $sort, $id, $width, $height, $this, $this->env, $allowed_remove_pattern);
+       return self::__toArray($thumb, $sort, $id, $width, $height, $this, $this->env, $allowed_remove_pattern, $crop_box_data);
 	}
 
-    public static function __toArray($thumb, $id, $sort = 1, $width = null, $height = null, $obj = null, $env = 'prod', $allowed_remove_pattern = null)
+    public static function __toArray($thumb, $id, $sort = 1, $width = null, $height = null, $obj = null, $env = 'prod', $allowed_remove_pattern = null, $crop_box_data = null)
     {
          // if($obj === null) $obj = $this;
 
@@ -54,6 +54,9 @@ class BlueimpFile extends UploadedFile
             $result["deleteUrl"] = !$allowed_remove_pattern || preg_match('#' . $allowed_remove_pattern . '#', $result["url"]) ? $url . "/_uploader/delete/".$id : null;
             $result["editUrl"] = $url . "/admin/dialog-form";
             $result["deleteType"] = "GET";
+
+            $result["cropBoxData"] = $crop_box_data != null ? $crop_box_data : [];
+            
         // }
         // else
         // {
