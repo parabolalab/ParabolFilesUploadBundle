@@ -26,7 +26,7 @@ trait Files {
 
                 if($this->isMultipleFilesAllowed($context) && in_array($property[0], ['g', 's'])) $method .= 's';
 
-                var_dump($method);
+                // var_dump($method);
 
                 if(method_exists($this, $method))
                 {
