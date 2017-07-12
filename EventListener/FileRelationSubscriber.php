@@ -276,6 +276,7 @@ class FileRelationSubscriber implements EventSubscriber
         if(get_class($args->getObject()) == 'Parabol\FilesUploadBundle\Entity\File')
         {
             $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getPath());
+            if($args->getObject()->getCropBoxData()) $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getCroppedPath());
             $path = $this->container->get('parabol.utils.path')->getWebDir().$args->getObject()->getPath();
             if(file_exists($path)) unlink($path);
             @rmdir(dirname($path));
