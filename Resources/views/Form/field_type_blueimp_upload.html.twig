@@ -156,11 +156,11 @@
  
 </script>
 
-
 <style>
     {% if form.vars.cropper %}
-    #{{ form.vars.name }}-fileupload button.edit { display: none; }
+        #{{ form.vars.name }}-fileupload button.edit { display: none; }
     {% else %}
+    {% if form.vars.edditable == false %} #{{ form.vars.name }}-fileupload button.edit { display: none; } {% endif %}
     #{{ form.vars.name }}-fileupload button.crop { display: none; }
     {% endif %}
 

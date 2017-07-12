@@ -19,6 +19,7 @@ class BlueimpType extends AbstractType
                 'labels' => [],
                 'description' => 'default',
                 'multiple' => false,
+                'edditable'=> false,
                 'order' => 'asc',
                 'class' => null,
                 'cropper' => false, //[aspectRation => Number or NaN, minCropBoxWidth >= 0, minCropBoxHeight >= 0 ]
@@ -39,6 +40,7 @@ class BlueimpType extends AbstractType
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];
         $view->vars['attr']['data']['order'] = $options['order'];
         $view->vars['class'] = $options['class'];
+        $view->vars['edditable'] = $options['edditable'];
         $view->vars['cropper'] = $options['cropper'];
 
 
