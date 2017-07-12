@@ -34,7 +34,7 @@ $(document).ready(function () {
 		   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
 		   	    })
 			    .on('fileuploadprocessstart', function (e) {
-			    	console.log('fileuploadprocessstart')
+	
 			    	if(typeof(parabol_file_browser_maxPerPage) == 'integer')
 			    	{
 			    			if($('#' + id + '-files > li').length > parabol_file_browser_maxPerPage) $('#' + id + '-files > li:' + ($input.data('order') == 'desc' ? 'last' : 'first') + '-child').hide();

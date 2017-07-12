@@ -23,7 +23,7 @@
             <i class="glyphicon glyphicon-plus"></i> 
             &nbsp;<span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
             <!-- The file input field used as target for the file upload widget -->
-            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ '/edit' in app.request.pathInfo ? 'edit' : 'new' }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" />
+            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }} name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ '/edit' in app.request.pathInfo ? 'edit' : 'new' }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" />
         </span>
         </div>
 
