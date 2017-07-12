@@ -119,10 +119,18 @@ class BlueimpController extends Controller
 
                 $file->move($dir, $slugizedName);
 
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
+
                 $dev['file_moved'] = true;
 
                 if($request->get('orginalFilePath') && $request->get('cropperBoxData') !== null)
                 {
+
+                    $this
+                    ->container
+                    ->get('liip_imagine.cache.manager')
+                    ->remove($path);
+
                     $params = [
                         'cropData' => $request->get('cropperBoxData'),
                         'path' => $request->get('orginalFilePath'),
@@ -137,7 +145,7 @@ class BlueimpController extends Controller
                     ->getQuery()
                     ->execute();
 
-                    $dev['file_updated'] = true;
+                    // $dev['file_updated'] = true;
                 }
             }
            
