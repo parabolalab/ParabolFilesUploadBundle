@@ -20,6 +20,8 @@ class BlueimpType extends AbstractType
                 'description' => 'default',
                 'multiple' => false,
                 'edditable'=> false,
+                'error_bubbling' => false,
+                'compound' => false,
                 'order' => 'asc',
                 'class' => null,
                 'cropper' => false, //[aspectRation => Number or NaN, minCropBoxWidth >= 0, minCropBoxHeight >= 0 ]
