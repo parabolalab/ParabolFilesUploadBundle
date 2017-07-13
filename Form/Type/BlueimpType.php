@@ -24,6 +24,7 @@ class BlueimpType extends AbstractType
                 'class' => null,
                 'cropper' => false, //[aspectRation => Number or NaN, minCropBoxWidth >= 0, minCropBoxHeight >= 0 ]
                 'allowed_remove_pattern' => null,
+                'required' => false,
                 'ref' => null,
                 'thumb' => [
                     'onclick' => null
