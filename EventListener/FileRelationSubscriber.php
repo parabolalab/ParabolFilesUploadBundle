@@ -202,14 +202,14 @@ class FileRelationSubscriber implements EventSubscriber
                 {
                     $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => '_'.hash('sha256', $this->container->get('session')->getId().'|'.$class), 'class' => $class, 'context' => $context, 'isNew' => true));  
 
-
-
-                    $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
+                        $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
 
                     // $uow->recomputeSingleEntityChangeSet( $em->getClassMetadata( $class ), $this->object);
        
                     
                 }
+
+                
 
             } 
             
@@ -225,7 +225,10 @@ class FileRelationSubscriber implements EventSubscriber
                 $this->object = $updated;
                 foreach($this->object->getFilesContexts() as $context)
                 {
-                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context, 'isNew' => true));
+
+                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context));
+
+                    $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
                 }
 
 	    	}
