@@ -86,7 +86,7 @@ class BlueimpController extends Controller
                 
                 $em->persist($f);
 
-                if($obj) $obj->__addFile($f, $context);
+                // if($obj) $obj->__addFile($f, $context);
 
                 if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref'))
                 {

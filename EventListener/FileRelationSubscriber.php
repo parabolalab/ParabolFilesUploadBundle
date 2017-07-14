@@ -145,29 +145,29 @@ class FileRelationSubscriber implements EventSubscriber
 		    $em->flush();
 
 
-            foreach($this->values as $context => $v)
-            {
-                if($v)
-                {
+            // foreach($this->values as $context => $v)
+            // {
+            //     if($v)
+            //     {
 
-                     $namingStrategy = $em
-                        ->getConfiguration()
-                        ->getNamingStrategy()
-                    ;
+            //          $namingStrategy = $em
+            //             ->getConfiguration()
+            //             ->getNamingStrategy()
+            //         ;
  
 
-                    $metadata = $em->getClassMetadata( get_class($this->object) );
+            //         $metadata = $em->getClassMetadata( get_class($this->object) );
 
                 
-                    $table = 'parabol_' . strtolower($namingStrategy->classToTableName($metadata->getName())) . '_'.$context;
+            //         $table = 'parabol_' . strtolower($namingStrategy->classToTableName($metadata->getName())) . '_'.$context;
 
-                    $conn = $this->container->get('doctrine')->getConnection();
-                    $conn->executeUpdate("INSERT IGNORE INTO {$table} (file_id, {$namingStrategy->joinKeyColumnName($metadata->getName())}) VALUES {$v}");
+            //         $conn = $this->container->get('doctrine')->getConnection();
+            //         $conn->executeUpdate("INSERT IGNORE INTO {$table} (file_id, {$namingStrategy->joinKeyColumnName($metadata->getName())}) VALUES {$v}");
 
        
                     
-                }
-            }
+            //     }
+            // }
 
             $this->values = [];
 
