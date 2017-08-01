@@ -225,11 +225,14 @@ class FileRelationSubscriber implements EventSubscriber
                 $this->object = $updated;
                 foreach($this->object->getFilesContexts() as $context)
                 {
-
                     $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context));
 
-                    $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
+                
+                    if($this->object->{'get' . ucfirst($context)}() == null) $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
                 }
+
+               //  var_dump($_POST, $this->object->getFiles());
+               // die();
 
 	    	}
 	    	elseif(get_class($updated) == 'Parabol\FilesUploadBundle\Entity\File')
