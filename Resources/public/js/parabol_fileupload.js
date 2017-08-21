@@ -19,7 +19,7 @@ $(document).ready(function () {
 			       	dataType: 'json',
 			       	autoUpload: true,
 			        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|pdf|zip|mp4|svg)$/i,
-			        maxFileSize: 5000000, // 5 MB
+			        maxFileSize: 100000000, // 50 MB
 			        disableImageResize: true,
 			        previewMaxWidth: 100,
 			        previewMaxHeight: 100,
