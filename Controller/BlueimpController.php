@@ -99,16 +99,22 @@ class BlueimpController extends Controller
 
                 $em->flush();
 
-                if($f->isImage())
-                {
-                    $imagemanagerResponse = $this->container
-                    ->get('liip_imagine.controller')
-                        ->filterAction(
-                            $request,
-                            $path,
-                            'admin_thumb'
-                    );    
-                }
+                // if($f->isImage())
+                // {
+                //     try {
+                //         $imagemanagerResponse = $this->container
+                //         ->get('liip_imagine.controller')
+                //             ->filterAction(
+                //                 $request,
+                //                 $path,
+                //                 'admin_thumb'
+                //         );    
+                //     }
+                //     catch(\Exception $e)
+                //     {
+                        
+                //     }
+                // }
                 
                 $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment(), null, null, $f->getPath());  
 
