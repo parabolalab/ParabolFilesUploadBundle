@@ -18,7 +18,7 @@ class BlueimpController extends Controller
 
         $class = $request->get('class');
         $context = $request->get('context');
-        $path = trim($request->get('path') ? $request->get('path') : $context, '/');
+        $path = trim($request->get('path') ? $request->get('path') : $context . '/' . ($request->get('ref') ?  $request->get('ref') : '') , '/');
         $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path);
         
         if(!file_exists($dir)) mkdir($dir, 0777, true);
@@ -63,7 +63,9 @@ class BlueimpController extends Controller
                     $i++;
                 }
 
+
                 $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
+
 
                 $f = new File();
                 $f->setPath($path); 
