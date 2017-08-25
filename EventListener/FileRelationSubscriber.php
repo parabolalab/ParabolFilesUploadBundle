@@ -116,8 +116,10 @@ class FileRelationSubscriber implements EventSubscriber
 
         		foreach ($files as $file) {
 
+                    $newDir =  dirname(strtr(preg_replace('#\/'.$this->object->getId().'#', '', $file->getPath()), ['/' . strtolower($context) . '/' => '/' . strtolower($context) . '/' . $this->object->getId() . '/']));
+                    
+                    if(!file_exists($dir . $newDir)) mkdir($dir . $newDir, 0777, true);
 
-                    $newDir = dirname(preg_replace('#([^/]+)$#', $this->object->getId().DIRECTORY_SEPARATOR.'$1',$file->getPath()));
                     $orgName = $slugizedName = basename($file->getPath());
 
                     $i = 1;
@@ -226,8 +228,6 @@ class FileRelationSubscriber implements EventSubscriber
                 foreach($this->object->getFilesContexts() as $context)
                 {
                     $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context));
-
-                
                     if($this->object->{'get' . ucfirst($context)}() == null) $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
                 }
 
