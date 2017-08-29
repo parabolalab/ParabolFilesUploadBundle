@@ -486,7 +486,7 @@ class File extends BaseEntity
                 case 'application/zip':
                     return '/bundles/parabolfilesupload/images/filesIcons/zip_icon.png';
                 break;
-                case 'application/mp4':
+                case 'video/mp4':
                     return '/bundles/parabolfilesupload/images/filesIcons/mp4_icon.png';
                 break;
                 case 'image/svg+xml':

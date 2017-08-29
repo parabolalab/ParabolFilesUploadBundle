@@ -16,6 +16,8 @@ class BlueimpController extends Controller
     {
         $request->getSession()->start();
 
+        $response = new JsonResponse();
+
         $class = $request->get('class');
         $context = $request->get('context');
         $path = trim($request->get('path') ? $request->get('path') : $context . '/' . ($request->get('ref') ?  $request->get('ref') : '') , '/');
@@ -24,7 +26,38 @@ class BlueimpController extends Controller
         if(!file_exists($dir)) mkdir($dir, 0777, true);
 
 
+        $filesExtensions = explode('|', $request->get('acceptedFileTypes'));
 
+        $imagesMimeTypes = [];
+        $filesMimeTypes = [];
+        
+        foreach ($filesExtensions as $ext) {
+            if(in_array($ext, ['jpg', 'jpeg', 'png', 'gif']))
+            {
+                $imagesMimeTypes[] = 'image/' . $ext;
+            }
+            elseif(in_array($ext, ['svg', 'pdf', 'zip', 'mp4']))
+            {
+                switch($ext)
+                {
+                    //vector images
+                    case 'svg': $filesMimeTypes[] = 'image/svg+xml'; break;
+                    
+                    //videos
+                    case 'mp4': 
+                        $filesMimeTypes[] = 'video/' . $ext; 
+                    break;
+                    
+                    //applications
+                    case 'zip':
+                        $filesMimeTypes[] = 'application/octet-stream';  
+                    case 'pdf': 
+                        $filesMimeTypes[] = 'application/' . $ext; 
+                    break;
+                }
+            }
+        }
+        
 
         $files = (array)$request->files->get($context);
         $dev = [];
@@ -40,13 +73,12 @@ class BlueimpController extends Controller
                 ;
         }
 
-
-
-
         foreach($files as $file)
         {
             
 
+                
+               
             $orgName = $slugizedName  = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $file->getClientOriginalName())) . '.'. strtolower($file->getClientOriginalExtension());
             
             
@@ -76,49 +108,79 @@ class BlueimpController extends Controller
                     list($width, $height) = getimagesize($file->getPathname());
                     $f->setWidth($width);
                     $f->setHeight($height);
+
+                    $fileConstraint = new \Symfony\Component\Validator\Constraints\Image([
+                            'mimeTypes' => $imagesMimeTypes, 
+                            'maxSize' => '5m', 
+                            'maxWidth' => 3840, 
+                            'maxHeight' => 3840
+                    ]);
                 }
-            
-                if($class) $f->setClass($class);
-                if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
-
-                $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
-
-                $file->move($dir, $slugizedName);
-
-                
-                $em->persist($f);
-
-                if($obj) $obj->__addFile($f, $context);
-
-                if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref'))
+                else 
                 {
-                    $oldFile = $em->getRepository('ParabolFilesUploadBundle:File')->findOneBy(array('ref' => $request->get('ref'), 'class' => $class, 'context' => $context));
-                    if($oldFile)
-                    {
-                        $em->remove($oldFile);
-                    }
+                    $fileConstraint = new \Symfony\Component\Validator\Constraints\File([
+                            'mimeTypes' => $filesMimeTypes, 
+                            'maxSize' => '125m'
+                    ]);
                 }
 
-                $em->flush();
-
-                if($f->isImage())
-                {
-                    try {
-                        $imagemanagerResponse = $this->container
-                        ->get('liip_imagine.controller')
-                            ->filterAction(
-                                $request,
-                                $path,
-                                'admin_thumb'
-                        );    
-                    }
-                    catch(\Exception $e)
-                    {
-                        
-                    }
-                }
+                $errors = $this->get('validator')->validate(
+                    $file,
+                    $fileConstraint 
+                );
                 
-                $data[] = BlueimpFile::__toArray($f->getMimeType() == 'image/svg+xml' ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment(), null, null, $f->getPath());  
+
+                if($errors->has(0))
+                {
+                    $data[] = [
+                        'name' => $file->getClientOriginalName(),
+                        'error' => htmlspecialchars($errors->get(0)->getMessage())
+                    ];
+                }
+                else
+                {
+
+                    if($class) $f->setClass($class);
+                    if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
+
+                    $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
+
+                    $file->move($dir, $slugizedName);
+
+                    $em->persist($f);
+
+                    if($obj) $obj->__addFile($f, $context);
+
+                    if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref'))
+                    {
+                        $oldFile = $em->getRepository('ParabolFilesUploadBundle:File')->findOneBy(array('ref' => $request->get('ref'), 'class' => $class, 'context' => $context));
+                        if($oldFile)
+                        {
+                            $em->remove($oldFile);
+                        }
+                    }
+
+                    $em->flush();
+
+                    if($f->isImage())
+                    {
+                        try {
+                            $imagemanagerResponse = $this->container
+                            ->get('liip_imagine.controller')
+                                ->filterAction(
+                                    $request,
+                                    $path,
+                                    'admin_thumb'
+                            );    
+                        }
+                        catch(\Exception $e)
+                        {
+                            
+                        }
+                    }
+                    
+                    $data[] = BlueimpFile::__toArray(!$f->isImage() ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment(), null, null, $f->isImage(), $f->getPath()); 
+                } 
 
             }
             else
@@ -166,7 +228,7 @@ class BlueimpController extends Controller
             
         }
         
-        $response = new JsonResponse();
+        
         $response->setData(array('files' => $data));
         
         return $response;   
@@ -216,7 +278,7 @@ class BlueimpController extends Controller
         {
 
             $bluimpFile = new BlueimpFile($this->get('parabol.utils.path')->getWebDir().$file->getPath(), $this->container->get('kernel')->getEnvironment());
-            $result[] = $bluimpFile->toArray($file->getMimeType() == 'image/svg+xml' ? $file->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($file->getPathForThumb(), 'admin_thumb'), $file->getId(), $file->getSort(), $file->getWidth(), $file->getHeight(), null, $file->getCropBoxData());            
+            $result[] = $bluimpFile->toArray(!$file->isImage() ? $file->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($file->getPathForThumb(), 'admin_thumb'), $file->getId(), $file->getSort(), $file->getWidth(), $file->getHeight(), null, $file->getCropBoxData(), $file->isImage());            
             
         }
 

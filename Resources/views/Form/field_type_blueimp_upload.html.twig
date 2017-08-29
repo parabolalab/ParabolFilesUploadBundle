@@ -23,7 +23,7 @@
             <i class="glyphicon glyphicon-plus"></i> 
             &nbsp;<span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
             <!-- The file input field used as target for the file upload widget -->
-            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }} name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ '/edit' in app.request.pathInfo ? 'edit' : 'new' }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" />
+            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }} name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ '/edit' in app.request.pathInfo ? 'edit' : 'new' }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" data-acceptfiletypes="{{ form.vars.acceptFileTypes | join('|') }}" accept=".{{ form.vars.acceptFileTypes | join(',.') }}" />
         </span>
         </div>
 
@@ -86,7 +86,7 @@
 {% verbatim %}   
 {% for (var i=0, file; file=o.files[i]; i++) { %}
 {% endverbatim %}   
-    <li class="btn btn-default template-download" {{ form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : '' }}
+    <li class="btn btn-default template-download {% verbatim %}{% if (file.error) { %}error{% } %}{% endverbatim %}" {{ form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : '' }}
 {% verbatim %}   
     data-file="{%=file.url%}" data-width="{%=file.width%}" data-height="{%=file.height%}" data-id="{%=file.id%}" data-sort="{%=file.sort%}"> 
          <input type="hidden" name="uploaded_files[]" value="{%=file.id%}" />
@@ -101,15 +101,16 @@
                 <small class="sizes">{%=file.width%}px x {%=file.height%}px</small>
                 {% } %}
             {% if (file.error) { %}
-                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+                <div><span class="label label-danger" style="position: absolute;left: 0;top: 79px;">Error</span></div>
             {% } %}
             <div style="position: absolute; top: 5px; right: 5px;">
             {% if (file.thumbnailUrl) { %}
                 <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
                     <i class="ion ion-edit"></i>
                 </button>
-{% endverbatim %}     
 
+            {% if (file.cropper) { %}
+            {% endverbatim %}     
                 <button  
                 {% verbatim %}
                     data-width="{%=file.width%}" 
@@ -122,14 +123,22 @@
                 class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px"  onclick="return $(this).admin_core_showCropper($(this));" >
                     <i class="fa fa-crop"></i>
                 </button>
-                
-{% verbatim %}                   
+            {% verbatim %}  
+            {% } %} 
+
                 {% if (file.deleteUrl) { %}
                 <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
                     <i class="ion ion-trash-b"></i>
                 </button>
                 {% } %}    
             {% } else { %}
+
+                {% if (file.error) { %}
+                <button class="btn btn-default btn-xs" style="padding: 2px 6px 1px" onclick="return false" data-toggle="tooltip" title="{%=file.name%}: {%=file.error%}">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </button>
+                {% } %}
+
                 <button class="btn btn-danger btn-xs cancel" style="margin-left: 4px;">
                     <i class="glyphicon glyphicon-remove"></i>
                 </button>

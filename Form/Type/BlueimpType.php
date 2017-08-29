@@ -25,6 +25,7 @@ class BlueimpType extends AbstractType
                 'order' => 'asc',
                 'class' => null,
                 'cropper' => false, //[aspectRation => Number or NaN, minCropBoxWidth >= 0, minCropBoxHeight >= 0 ]
+                'acceptFileTypes' => ['gif','jpg','jpeg','png','pdf','zip','mp4','svg'],
                 'allowed_remove_pattern' => null,
                 'required' => false,
                 'ref' => null,
@@ -45,6 +46,10 @@ class BlueimpType extends AbstractType
         $view->vars['class'] = $options['class'];
         $view->vars['edditable'] = $options['edditable'];
         $view->vars['cropper'] = $options['cropper'];
+
+
+        if($options['acceptFileTypes'] && !is_array($options['acceptFileTypes'])) throw new InvalidOptionsException('The options "acceptFileTypes" must by an array.');
+        $view->vars['acceptFileTypes'] = $options['acceptFileTypes'];
 
 
         if(isset($options['cropper']['aspectRatio']) && $options['cropper']['aspectRatio'] != 'NaN')

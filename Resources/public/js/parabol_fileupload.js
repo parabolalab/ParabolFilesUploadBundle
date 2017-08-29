@@ -13,25 +13,37 @@ $(document).ready(function () {
 				})
 				if(files_error) $(this).find('.files-error').removeClass('hidden');
 
+
+
+
+
+				// acceptFileTypes = 
+
 				var $input = $(this).find('.fileupload-input')
 
+				
+				var acceptfiletypes = new RegExp('(\.|\/)(' + $input.data('acceptfiletypes') + ')$', 'i')
+				
 				 $(this).fileupload({
 			       	dataType: 'json',
 			       	autoUpload: true,
-			        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|pdf|zip|mp4|svg)$/i,
-			        maxFileSize: 100000000, // 50 MB
+			        acceptFileTypes: acceptfiletypes,
 			        disableImageResize: true,
 			        previewMaxWidth: 100,
 			        previewMaxHeight: 100,
 			        previewCrop: true,
-			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context')}	        
+			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), 'acceptedFileTypes': $input.data('acceptfiletypes')}	        
 		        })
 				.on('fileuploadfinished', function (e, data) {
-					if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
-					if($('input[id$=_filesUpdatedAt]').length) $('input[id$=_filesUpdatedAt]').val(moment().format('YYYY-MM-DD HH:mm:ss'))
 
-					if(sortableNewValues[id].length) renewSortableValues(id, $('ul#' + id + '-files'))
-		   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
+					if(!$('#' + id + '-files > li:last-child').hasClass('error'))
+					{
+						if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
+						if($('input[id$=_filesUpdatedAt]').length) $('input[id$=_filesUpdatedAt]').val(moment().format('YYYY-MM-DD HH:mm:ss'))
+
+						if(sortableNewValues[id].length) renewSortableValues(id, $('ul#' + id + '-files'))
+			   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
+			   	   	}
 		   	    })
 			    .on('fileuploadprocessstart', function (e) {
 	
