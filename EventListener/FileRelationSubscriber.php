@@ -15,15 +15,15 @@ use Doctrine\ORM\Query\ResultSetMapping;
 class FileRelationSubscriber implements EventSubscriber
 {
 
-	private $container, $analizer, $files = [], $values = [], $object;
+    private $container, $analizer, $files = [], $values = [], $object;
 
-	public function __construct($container, $analizer)
-	{
+    public function __construct($container, $analizer)
+    {
 
         $this->analizer = $analizer;
-		$this->container = $container;
+        $this->container = $container;
 
-	}
+    }
 
     /**
      * {@inheritDoc}
@@ -104,47 +104,55 @@ class FileRelationSubscriber implements EventSubscriber
         // throw new \Exception("Error Processing Request", 1);
         
         if(!empty($this->files))
-    	{
+        {
             $em  = $args->getEntityManager();
 
-    	    $dir = $this->container->get('parabol.utils.path')->getWebDir();
+            $dir = $this->container->get('parabol.utils.path')->getWebDir();
 
             
             foreach ($this->files as $context => $files) {
 
                 if(!isset($this->values[$context])) $this->values[$context] = '';
 
-        		foreach ($files as $file) {
+                // var_/dump($files);
+
+                foreach ($files as $file) {
 
                     $newDir =  dirname(strtr(preg_replace('#\/'.$this->object->getId().'#', '', $file->getPath()), ['/' . strtolower($context) . '/' => '/' . strtolower($context) . '/' . $this->object->getId() . '/']));
                     
                     if(!file_exists($dir . $newDir)) mkdir($dir . $newDir, 0777, true);
 
-                    $orgName = $slugizedName = basename($file->getPath());
-
-                    $i = 1;
-                    while(file_exists($dir . $newDir . DIRECTORY_SEPARATOR . $slugizedName))
+                    if($newDir !== dirname($file->getPath()))
                     {
-                        $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
-                        $i++;
+                            $orgName = $slugizedName = basename($file->getPath());
+
+                            $i = 1;
+                            while(file_exists($dir . $newDir . DIRECTORY_SEPARATOR . $slugizedName))
+                            {
+                                $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
+                                $i++;
+                            }
+
+                            $file->setPath($newDir . DIRECTORY_SEPARATOR . $slugizedName);
                     }
+                   
                     $file->setRef($this->object->getId());
-    				$file->setPath($newDir . DIRECTORY_SEPARATOR . $slugizedName);
-    				$file->setIsNew(false);
+                    
+                    $file->setIsNew(false);
                 
 
                     $this->values[$context] .= ($this->values[$context] ? "," : "") . "({$file->getId()}, {$this->object->getId()})";
-    			}
+                }
 
 
 
 
             }
 
-		    $this->files = []; 		
+            $this->files = [];      
 
 
-		    $em->flush();
+            $em->flush();
 
 
             // foreach($this->values as $context => $v)
@@ -174,15 +182,15 @@ class FileRelationSubscriber implements EventSubscriber
             $this->values = [];
 
 
-	
-		}
-		   
-	    	
+    
+        }
+           
+            
     }
     public function onFlush(OnFlushEventArgs $args)
     {
 
-    	$em  = $args->getEntityManager();
+        $em  = $args->getEntityManager();
         $uow = $em->getUnitOfWork();
         
 
@@ -222,7 +230,7 @@ class FileRelationSubscriber implements EventSubscriber
         foreach ($uow->getScheduledEntityUpdates() as $updated) {
             $refClass = new \ReflectionClass($updated);
             if($this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
-	    	{
+            {
                 $class = $refClass->name;
                 $this->object = $updated;
                 foreach($this->object->getFilesContexts() as $context)
@@ -234,28 +242,28 @@ class FileRelationSubscriber implements EventSubscriber
                //  var_dump($_POST, $this->object->getFiles());
                // die();
 
-	    	}
-	    	elseif(get_class($updated) == 'Parabol\FilesUploadBundle\Entity\File')
-	    	{
-	    		$changeSet = $uow->getEntityChangeSet($updated);
-            	if(isset($changeSet['path']))
-            	{
-            		$web_dir = $this->container->get('parabol.utils.path')->getWebDir();	
+            }
+            elseif(get_class($updated) == 'Parabol\FilesUploadBundle\Entity\File')
+            {
+                $changeSet = $uow->getEntityChangeSet($updated);
+                if(isset($changeSet['path']))
+                {
+                    $web_dir = $this->container->get('parabol.utils.path')->getWebDir();    
                     
                     if(file_exists($web_dir . $changeSet['path'][0]))
                     {
-                		$dir = $web_dir . dirname($changeSet['path'][1]);
-                		if(!file_exists($dir)) mkdir($dir, 0777, true);
+                        $dir = $web_dir . dirname($changeSet['path'][1]);
+                        if(!file_exists($dir)) mkdir($dir, 0777, true);
 
                         $oldCropped = preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][0]);
                         if(file_exists($web_dir . $oldCropped)) rename($web_dir . $oldCropped, $web_dir .  preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][1]));
-                		rename($web_dir . $changeSet['path'][0], $web_dir . $changeSet['path'][1]);
+                        rename($web_dir . $changeSet['path'][0], $web_dir . $changeSet['path'][1]);
 
                     }
 
-            	}
-            	
-	    	}
+                }
+                
+            }
         }
 
 
