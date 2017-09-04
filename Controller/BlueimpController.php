@@ -120,7 +120,7 @@ class BlueimpController extends Controller
                 {
                     $fileConstraint = new \Symfony\Component\Validator\Constraints\File([
                             'mimeTypes' => $filesMimeTypes, 
-                            'maxSize' => '125m'
+                            'maxSize' => '95m'
                     ]);
                 }
 
