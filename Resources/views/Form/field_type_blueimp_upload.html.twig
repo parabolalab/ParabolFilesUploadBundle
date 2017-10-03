@@ -127,7 +127,7 @@
             {% } %} 
 
                 {% if (file.deleteUrl) { %}
-                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %} {% endverbatim %}{{ form.vars.thumb.onclick ? 'onclick=browser_removeFile($(this))' : '' }}{% verbatim %}>
                     <i class="ion ion-trash-b"></i>
                 </button>
                 {% } %}    

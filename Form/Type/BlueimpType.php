@@ -40,7 +40,7 @@ class BlueimpType extends AbstractType
         parent::buildView($view, $form, $options);
 
         $view->vars['description'] = $options['description'];
-        $view->vars['attr']['multiple'] = call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']);
+        $view->vars['attr']['multiple'] = $options['class'] ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : true;
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];
         $view->vars['attr']['data']['order'] = $options['order'];
         $view->vars['class'] = $options['class'];
@@ -73,6 +73,7 @@ class BlueimpType extends AbstractType
             throw new InvalidOptionsException('The options "cropper[minCropBoxWidth]" must contain a number');
         }
 
+        
         $view->vars['attr']['data']['class'] = $options['class'];
         $view->vars['attr']['data']['ref'] = $options['ref'];
         $view->vars['thumb'] = $options['thumb'];
