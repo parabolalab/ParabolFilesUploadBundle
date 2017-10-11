@@ -25,7 +25,7 @@ class BlueimpType extends AbstractType
                 'order' => 'asc',
                 'class' => null,
                 'cropper' => false, //[aspectRation => Number or NaN, minCropBoxWidth >= 0, minCropBoxHeight >= 0 ]
-                'acceptFileTypes' => ['gif','jpg','jpeg','png','pdf','zip','mp4','svg'],
+                'acceptMimeTypes' => ['image/gif','image/jpeg','image/png','application/pdf','application/zip','video/mp4','image/svg+xml'],
                 'allowed_remove_pattern' => null,
                 'required' => false,
                 'ref' => null,
@@ -48,8 +48,8 @@ class BlueimpType extends AbstractType
         $view->vars['cropper'] = $options['cropper'];
 
 
-        if($options['acceptFileTypes'] && !is_array($options['acceptFileTypes'])) throw new InvalidOptionsException('The options "acceptFileTypes" must by an array.');
-        $view->vars['acceptFileTypes'] = $options['acceptFileTypes'];
+        if($options['acceptMimeTypes'] && !is_array($options['acceptMimeTypes'])) throw new InvalidOptionsException('The options "acceptMimeTypes" must by an array.');
+        $view->vars['acceptMimeTypes'] = $options['acceptMimeTypes'];
 
 
         if(isset($options['cropper']['aspectRatio']) && $options['cropper']['aspectRatio'] != 'NaN')

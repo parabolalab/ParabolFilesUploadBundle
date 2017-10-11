@@ -11,11 +11,12 @@ use Doctrine\ORM\Events;
 use Knp\DoctrineBehaviors\ORM\AbstractSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Parabol\FilesUploadBundle\Entity\File;
 
 class FileRelationSubscriber implements EventSubscriber
 {
 
-    private $container, $analizer, $files = [], $values = [], $object;
+    private $container, $analizer, $files = [], $values = [];
 
     public function __construct($container, $analizer)
     {
@@ -31,11 +32,49 @@ class FileRelationSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            Events::prePersist,
             Events::loadClassMetadata,
             Events::postFlush,
             Events::onFlush,
             Events::postRemove,
         );
+    }
+
+    public function prePersist(LifecycleEventArgs $arg)
+    {
+        $this->removeOldFileIfSingleFileInput($arg);
+        $this->addFileToRefObject($arg);
+    }
+
+    private function removeOldFileIfSingleFileInput(LifecycleEventArgs $arg)
+    {
+         $entity = $arg->getEntity()
+         if($entity instanceof File)
+         {
+            $class = $entity->getClass();
+            $em = $arg->getEntityManager();
+            if($class && !$class::isMultipleFilesAllowed($context) && $entity->getRef()
+               && $oldFile = $em->getRepository(File::class)->findOneBy(['ref' => $entity->getRef(), 'class' => $class, 'context' => $context])) {
+                    $em->remove($oldFile);
+            }
+        }
+
+    }
+
+    private function addFileToRefEntity(LifecycleEventArgs $arg)
+    {
+         $entity = $arg->getEntity()
+         if($entity instanceof File)
+         {
+            $class = $entity->getClass();
+            $em = $arg->getEntityManager();
+            if($class)
+            {
+                $refEntity = $this->getDoctrine()->getRepository( $class )->find( $entity->getRef() );
+                if($refEntity) $refEntity->__addFile($file, $file->getContext());
+            }
+        }
+
     }
 
     /**
@@ -71,7 +110,7 @@ class FileRelationSubscriber implements EventSubscriber
         {
 
             $metadata->mapManyToMany(array(
-                'targetEntity'  => 'Parabol\FilesUploadBundle\Entity\File',
+                'targetEntity'  => File::class,
                 'fieldName'     => $context,
                 'cascade'       => array('persist', 'remove'),
                 'orderBy'       => array('sort' => 'DESC'),
@@ -243,7 +282,7 @@ class FileRelationSubscriber implements EventSubscriber
                // die();
 
             }
-            elseif(get_class($updated) == 'Parabol\FilesUploadBundle\Entity\File')
+            elseif($updated instanceof File)
             {
                 $changeSet = $uow->getEntityChangeSet($updated);
                 if(isset($changeSet['path']))
@@ -287,7 +326,7 @@ class FileRelationSubscriber implements EventSubscriber
 
     public function postRemove(LifecycleEventArgs $args) { 
         
-        if(get_class($args->getObject()) == 'Parabol\FilesUploadBundle\Entity\File')
+        if($args->getObject() instanceof File)
         {
             $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getPath());
             if($args->getObject()->getCropBoxData()) $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getCroppedPath());
