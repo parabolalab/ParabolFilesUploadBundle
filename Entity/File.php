@@ -111,6 +111,12 @@ class File extends BaseEntity
       */
     private $height;
 
+    /**
+      * @ORM\Column(name="size", type="integer", nullable=true)
+      */
+    private $size;
+
+
      /**
       * @ORM\Column(name="cropBoxData", type="json_array", nullable=true)
       */
@@ -119,6 +125,7 @@ class File extends BaseEntity
 
     public function __construct() {
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this;
     }
 
     public function getSluggableFields()
@@ -623,6 +630,29 @@ class File extends BaseEntity
     }
 
     /**
+     * Set size
+     *
+     * @param integer $size
+     *
+     * @return File
+     */
+    public function setSize($size)
+    {
+        $this->size = $size;
+
+        return $this;
+    }
+
+    /**
+     * Get size
+     *
+     * @return integer
+     */
+    public function getSize()
+    {
+        return $this->size;
+    }
+    /**
      * Set cropBoxData
      *
      * @param integer $cropBoxData
@@ -645,4 +675,6 @@ class File extends BaseEntity
     {
         return $this->cropBoxData;
     }
+
+
 }

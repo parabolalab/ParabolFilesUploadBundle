@@ -11,3 +11,9 @@ services:
         class: Parabol\FilesUploadBundle\Form\Type\BlueimpType
         tags:
             - { name: form.type, alias: blueimp_upload }
+
+    parabol.helper.blueimp_file:
+        class: Parabol\FilesUploadBundle\Service\BlueimpFileHelper
+        arguments:
+            - "@router"
+            - "@liip_imagine.cache.manager"

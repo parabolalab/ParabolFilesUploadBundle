@@ -5,7 +5,6 @@ namespace Parabol\FilesUploadBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Parabol\FilesUploadBundle\Component\File\BlueimpFile;
 use Parabol\FilesUploadBundle\Entity\File;
 use Parabol\BaseBundle\Util\PathUtil;
 
@@ -14,6 +13,7 @@ class BlueimpController extends Controller
    
     public function uploadAction(Request $request)
     {
+
         $request->getSession()->start();
 
         $response = new JsonResponse();
@@ -59,7 +59,7 @@ class BlueimpController extends Controller
         }
         
 
-        $files = (array)$request->files->get($context);
+        $uploadedfiles = (array)$request->files->get($context);
         $dev = [];
 
         $data = array();
@@ -73,13 +73,13 @@ class BlueimpController extends Controller
                 ;
         }
 
-        foreach($files as $file)
+        foreach($uploadedfiles as $uploadedfile)
         {
             
-
-                
+                // var_dump($file);
+                // die();
                
-            $orgName = $slugizedName  = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $file->getClientOriginalName())) . '.'. strtolower($file->getClientOriginalExtension());
+            $orgName = $slugizedName  = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $uploadedfile->getClientOriginalName())) . '.'. strtolower($uploadedfile->getClientOriginalExtension());
             
             
 
@@ -98,16 +98,16 @@ class BlueimpController extends Controller
 
                 $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
 
+                $file = (new File())
+                        ->setPath($path)
+                        ->setContext($context)
+                        ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType());
 
-                $f = new File();
-                $f->setPath($path); 
-                $f->setContext($context); 
-                $f->setMimeType($file->getMimeType() == 'text/plain' && strtolower($file->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $file->getMimeType());
-                if($f->isImage())
+                if($file->isImage())
                 {
-                    list($width, $height) = getimagesize($file->getPathname());
-                    $f->setWidth($width);
-                    $f->setHeight($height);
+                    list($width, $height) = getimagesize($uploadedfile->getPathname());
+                    $file->setWidth($width);
+                    $file->setHeight($height);
 
                     $fileConstraint = new \Symfony\Component\Validator\Constraints\Image([
                             'mimeTypes' => $imagesMimeTypes, 
@@ -125,7 +125,7 @@ class BlueimpController extends Controller
                 }
 
                 $errors = $this->get('validator')->validate(
-                    $file,
+                    $uploadedfile,
                     $fileConstraint 
                 );
                 
@@ -133,23 +133,23 @@ class BlueimpController extends Controller
                 if($errors->has(0))
                 {
                     $data[] = [
-                        'name' => $file->getClientOriginalName(),
+                        'name' => $uploadedfile->getClientOriginalName(),
                         'error' => htmlspecialchars($errors->get(0)->getMessage())
                     ];
                 }
                 else
                 {
 
-                    if($class) $f->setClass($class);
-                    if($request->get('refAdminUrl')) $f->setRef($request->get('refAdminUrl'));
+                    if($class) $file->setClass($class);
+                    if($request->get('refAdminUrl')) $file->setRef($request->get('refAdminUrl'));
 
-                    $f->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
+                    $file->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
 
-                    $file->move($dir, $slugizedName);
+                    $uploadedfile->move($dir, $slugizedName);
 
-                    $em->persist($f);
+                    $em->persist($file);
 
-                    if($obj) $obj->__addFile($f, $context);
+                    if($obj) $obj->__addFile($file, $context);
 
                     if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref'))
                     {
@@ -162,7 +162,7 @@ class BlueimpController extends Controller
 
                     $em->flush();
 
-                    if($f->isImage())
+                    if($file->isImage())
                     {
                         try {
                             $imagemanagerResponse = $this->container
@@ -179,7 +179,7 @@ class BlueimpController extends Controller
                         }
                     }
                     
-                    $data[] = BlueimpFile::__toArray(!$f->isImage() ? $f->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($f->getPathForThumb(), 'admin_thumb'), $f->getId(), $f->getSort(), $f->getWidth(), $f->getHeight(), $file, $this->get('kernel')->getEnvironment(), null, null, $f->isImage(), $f->getPath()); 
+                    $data[] = $this->get('parabol.helper.blueimp_file')->toArray($file);
                 } 
 
             }
@@ -187,7 +187,7 @@ class BlueimpController extends Controller
             {
                 $dev['file'] = $request->get('orginalFilePath');
 
-                $file->move($dir, $slugizedName);
+                $uploadedfile->move($dir, $slugizedName);
 
                 $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
 
@@ -215,7 +215,6 @@ class BlueimpController extends Controller
                     ->getQuery()
                     ->execute();
 
-                    // $dev['file_updated'] = true;
                 }
             }
            
@@ -246,7 +245,6 @@ class BlueimpController extends Controller
 
         if($request->query->get('type') == 'edit')
         {
-            // var_dump('edit', $params['hash']);
             $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
             foreach($oldFiles as $oldFile)
             {
@@ -257,11 +255,7 @@ class BlueimpController extends Controller
 
 
         }
-
-
-        // throw new \Exception("Error Processing Request", 1);
         
-
         $files = $em
                 ->getRepository('ParabolFilesUploadBundle:File')
                 ->createQueryBuilder('f')
@@ -276,10 +270,7 @@ class BlueimpController extends Controller
 
         foreach($files as $file)
         {
-
-            $bluimpFile = new BlueimpFile($this->get('parabol.utils.path')->getWebDir().$file->getPath(), $this->container->get('kernel')->getEnvironment());
-            $result[] = $bluimpFile->toArray(!$file->isImage() ? $file->getPathForThumb() : $this->get('liip_imagine.cache.manager')->getBrowserPath($file->getPathForThumb(), 'admin_thumb'), $file->getId(), $file->getSort(), $file->getWidth(), $file->getHeight(), null, $file->getCropBoxData(), $file->isImage());            
-            
+            $result[] = $this->get('parabol.helper.blueimp_file')->toArray($file);
         }
 
         $response = new JsonResponse();
@@ -326,11 +317,6 @@ class BlueimpController extends Controller
         $em->flush();
 
         return new JsonResponse(array('result' => 'success'));
-    }
-
-    private function uploadedFileToJSON()
-    {
-
     }
 
 }
