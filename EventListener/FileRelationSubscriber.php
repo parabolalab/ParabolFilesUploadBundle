@@ -211,7 +211,7 @@ class FileRelationSubscriber implements EventSubscriber
         foreach ($uow->getScheduledEntityInsertions() as $inserted) {
             $refClass = new \ReflectionClass($inserted);
 
-            if($this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\File::class))
+            if($this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class))
             {
 
                 $class = $refClass->name;
@@ -240,11 +240,13 @@ class FileRelationSubscriber implements EventSubscriber
 
 
         foreach ($uow->getScheduledEntityUpdates() as $updated) {
-            var_dump($updated);
-            die();
             $refClass = new \ReflectionClass($updated);
-            if($this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\File::class))
+
+            var_dump(get_class($updated), $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\File::class));
+
+            if($this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class))
             {
+                var_dump('file process');
                 $class = $refClass->name;
                 $this->object = $updated; die();
                 foreach($this->object->getFilesContexts() as $context)
@@ -259,6 +261,8 @@ class FileRelationSubscriber implements EventSubscriber
                // die();
 
             }
+
+             die();
         //     elseif($updated instanceof File)
         //     {
         //         $changeSet = $uow->getEntityChangeSet($updated);
