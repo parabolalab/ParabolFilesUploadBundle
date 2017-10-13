@@ -22,20 +22,20 @@ $(document).ready(function () {
 				var $input = $(this).find('.fileupload-input')
 
 				
-				var acceptfiletypes = new RegExp('(\.|\/)(' + $input.data('acceptfiletypes') + ')$', 'i')
+				var acceptmimetypes = new RegExp('(\.|\/)(' + $input.data('acceptmimetypes') + ')$', 'i')
 				
 				 $(this).fileupload({
 			       	dataType: 'json',
 			       	autoUpload: true,
-			        acceptFileTypes: acceptfiletypes,
+			        // acceptFileTypes: acceptmimetypes,
 			        disableImageResize: true,
 			        previewMaxWidth: 100,
 			        previewMaxHeight: 100,
 			        previewCrop: true,
-			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), 'acceptedFileTypes': $input.data('acceptfiletypes')}	        
+			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}	        
 		        })
 				.on('fileuploadfinished', function (e, data) {
-
+					console.log('fileuploadfinished')
 					if(!$('#' + id + '-files > li:last-child').hasClass('error'))
 					{
 						if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
@@ -46,13 +46,11 @@ $(document).ready(function () {
 			   	   	}
 		   	    })
 			    .on('fileuploadprocessstart', function (e) {
-	
-			    	if(typeof(parabol_file_browser_maxPerPage) == 'integer')
+					if(typeof(parabol_file_browser_maxPerPage) == 'integer')
 			    	{
 			    			if($('#' + id + '-files > li').length > parabol_file_browser_maxPerPage) $('#' + id + '-files > li:' + ($input.data('order') == 'desc' ? 'last' : 'first') + '-child').hide();
 			    	}
 			    	if($input.data('order') == 'desc') $('#' + id + '-files > div:last-child').prependTo('#' + id + '-files');
-			    	// alert('aa')
 			    })
 			    ;
 

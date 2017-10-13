@@ -5,6 +5,7 @@ namespace Parabol\FilesUploadBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Parabol\FilesUploadBundle\Entity\File;
 use Parabol\BaseBundle\Util\PathUtil;
 
@@ -47,14 +48,16 @@ class BlueimpController extends Controller
 
                 $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
 
+                $fileHelper = $this->get('parabol.helper.blueimp_file');
+
                 $file = (new File())
                         ->setPath($path)
                         ->setContext($context)
-                        ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType());
-                        ->setClass($class ? $class : null);
-                        ->setRef( $request->get('ref') ?  $request->get('ref') : '_'.hash('sha256', $request->getSession()->getId() . '|' . $class));
+                        ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType())
+                        ->setClass($class ? $class : null)
+                        ->setRef( $fileHelper->generateRef($request->getSession()->getId(), $class) );
 
-                $errors = $this->validate($file, $request);
+                $errors = $this->validate($uploadedfile, $file, $request);
 
                 if($errors->has(0))
                 {
@@ -99,7 +102,7 @@ class BlueimpController extends Controller
                         }
                     }
                     
-                    $data[] = $this->get('parabol.helper.blueimp_file')->toArray($file);
+                    $data[] = $fileHelper->toArray($file);
                 } 
 
             }
@@ -147,7 +150,7 @@ class BlueimpController extends Controller
         return $response;   
     }
 
-    private function validate(File $file, Request $request)
+    private function validate(UploadedFile $uploadedfile, File $file, Request $request)
     {
         $acceptedMimeTypes = explode('|', $request->get('acceptedMimeTypes'));
 
@@ -188,18 +191,18 @@ class BlueimpController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if($request->query->get('type') == 'edit')
-        {
-            $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
-            foreach($oldFiles as $oldFile)
-            {
-                $em->remove($oldFile);
-            }
+        // if($request->query->get('type') == 'edit')
+        // {
+        //     $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
+        //     foreach($oldFiles as $oldFile)
+        //     {
+        //         $em->remove($oldFile);
+        //     }
 
-            $em->flush();
+        //     $em->flush();
 
 
-        }
+        // }
         
         $files = $em
                 ->getRepository('ParabolFilesUploadBundle:File')

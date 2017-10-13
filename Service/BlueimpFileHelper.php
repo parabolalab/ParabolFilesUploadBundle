@@ -36,4 +36,11 @@ class BlueimpFileHelper
 
 		return $result;
 	}
+
+	public function generateRef($sessionId, $class)
+	{
+		return '_'.hash('sha256', $sessionId . '|' . $class);
+	}
+
+
 }
