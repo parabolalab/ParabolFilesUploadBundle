@@ -8,6 +8,7 @@ trait Files {
 
 	public $files;
     protected $filesUpdatedAt;
+    protected $filesOrder;
 
     public function __call($property, $arguments)
     {
@@ -44,6 +45,7 @@ trait Files {
 
     public function __addFile(\Parabol\FilesUploadBundle\Entity\File $file, $context = 'files')
     {
+        if($this->{$context} === null) $this->{$context} =  new \Doctrine\Common\Collections\ArrayCollection();
         $this->{$context}->add($file);
 
         return $this;
@@ -119,6 +121,17 @@ trait Files {
     public function getFilesUpdatedAt()
     {
         return $this->filesUpdatedAt;
+    }
+
+    public function getFilesOrder()
+    {
+        return $this->filesOrder;
+    }
+
+    public function setFilesOrder($value)
+    {
+        $this->filesOrder = json_decode($value, true);
+        return $this;
     }
 }
 

@@ -13,7 +13,7 @@ parabol_uploader_delete:
     defaults:  { _controller: ParabolFilesUploadBundle:Blueimp:delete }
     options: { i18n: false }
 
-parabol_uploader_update_pos:
-    path: /_uploader/update-position
-    defaults:  { _controller: ParabolFilesUploadBundle:Blueimp:updatePosition }
-    options: { i18n: false }
+# parabol_uploader_update_pos:
+#     path: /_uploader/update-position
+#     defaults:  { _controller: ParabolFilesUploadBundle:Blueimp:updatePosition }
+#     options: { i18n: false }

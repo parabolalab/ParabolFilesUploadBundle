@@ -1,7 +1,37 @@
+
+
 $(document).ready(function () {
-       var sortableNewValues = {};
+       
        if($('.fileupload').length)
 	   {	
+
+	   		var sortableNewValues = {};
+
+			function renewSortableValues(id, $obj)
+			{
+				var max = $obj.children().length;
+				sortableNewValues[id] = { length: 0, values: {} }
+				
+				$obj.children().each(function(index){
+					sortableNewValues[id].values[$(this).attr('data-id')] = max - index; 
+					$(this).attr('data-sort', max - index)
+					sortableNewValues[id].length++;
+				})
+
+				console.log(sortableNewValues)
+
+				
+
+			}
+
+	   		if($('input[id$=filesOrder]').length)
+	   		{
+	   			$('.fileupload').first().closest('form').submit(function(){
+	   				 $('input[id$=filesOrder]').val(JSON.stringify(sortableNewValues).replace(/\-fileupload/g, ''));
+	   			})	
+	   		}
+	   		
+
 
 			$('.fileupload').each(function(){
 
@@ -35,7 +65,6 @@ $(document).ready(function () {
 			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}	        
 		        })
 				.on('fileuploadfinished', function (e, data) {
-					console.log('fileuploadfinished')
 					if(!$('#' + id + '-files > li:last-child').hasClass('error'))
 					{
 						if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
@@ -43,6 +72,7 @@ $(document).ready(function () {
 
 						if(sortableNewValues[id].length) renewSortableValues(id, $('ul#' + id + '-files'))
 			   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
+
 			   	   	}
 		   	    })
 			    .on('fileuploadprocessstart', function (e) {
@@ -52,7 +82,11 @@ $(document).ready(function () {
 			    	}
 			    	if($input.data('order') == 'desc') $('#' + id + '-files > div:last-child').prependTo('#' + id + '-files');
 			    })
-			    ;
+				.on('fileuploaddestroyed', function (e, data) {
+					renewSortableValues(id, $('ul#' + id + '-files'))
+				})
+				;
+			    
 
 				if($input.data('class'))
 				{
@@ -76,18 +110,23 @@ $(document).ready(function () {
 				            template.addClass('in');
 				            $('#loading').remove();
 
+				            renewSortableValues(id, $('#' + id + ' ul.files'))
+
 				            $('#' + id + ' ul.files').sortable({
 				            	placeholder: '<li class="placeholder template-download btn btn-default"></li>',
 				            	onDrop: function ($item, container, _super, event) {
 								  $item.removeClass("dragged").removeAttr("style")
 								  $("body").removeClass("dragging")
 								  renewSortableValues(id, $(container.el))
-				            	  $.post(sf_env+'/_uploader/update-position', $item.data(), function(jdata){
-				            	  		if(jdata.result != 'success')
-				            	  		{
-				            	  			alert('error');
-				            	  		}
-				            	  });
+
+
+
+				            	  // $.post(sf_env+'/_uploader/update-position', $item.data(), function(jdata){
+				            	  // 		if(jdata.result != 'success')
+				            	  // 		{
+				            	  // 			alert('error');
+				            	  // 		}
+				            	  // });
 
 								}
 				            })
@@ -95,15 +134,7 @@ $(document).ready(function () {
 			    }
 		    })
 		}
-        function renewSortableValues(id, $obj)
-        {
-        	var max = $obj.children().length;
-        	sortableNewValues[id].length = 0;
-			$obj.children().each(function(index){
-				sortableNewValues[id].values[$(this).attr('data-id')] = max - index; 
-				$(this).attr('data-sort', max - index)
-				sortableNewValues[id].length++;
-			})
-        }
+        
 
 })
+

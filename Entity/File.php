@@ -11,7 +11,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
  * Page
  *
  * @ORM\Table(name="parabol_file")
- * @ORM\Entity(repositoryClass="Parabol\FilesUploadBundle\Entity\FileRepository")
+ * @ORM\Entity(repositoryClass="Parabol\FilesUploadBundle\Repository\FileRepository")
  */
 class File extends BaseEntity
 {
@@ -50,6 +50,11 @@ class File extends BaseEntity
      * @ORM\Column(name="ref", type="string", length=65, nullable=true)
      */
     private $ref;
+
+    /**
+     * @ORM\Column(name="initRef", type="string", length=65, nullable=true)
+     */
+    private $initRef;
 
     /**
      * @ORM\Column(name="context", type="string", length=50, nullable=true)
@@ -121,6 +126,12 @@ class File extends BaseEntity
       * @ORM\Column(name="cropBoxData", type="json_array", nullable=true)
       */
     private $cropBoxData;
+
+
+     /**
+     * @ORM\Column(name="toRemove", type="string", length=65, nullable=true)
+     */
+    private $toRemove;
 
 
     public function __construct() {
@@ -236,6 +247,11 @@ class File extends BaseEntity
         return $this;
     }
 
+    public function hasAssociation()
+    {
+        return $this->ref[0] !== '_';        
+    }
+
     /**
      * Get ref
      *
@@ -244,6 +260,29 @@ class File extends BaseEntity
     public function getRef()
     {
         return $this->ref;
+    }
+
+    /**
+     * Set initRef
+     *
+     * @param integer $initRef
+     * @return File
+     */
+    public function setInitRef($initRef)
+    {
+        $this->initRef = $initRef;
+
+        return $this;
+    }
+
+    /**
+     * Get initRef
+     *
+     * @return integer 
+     */
+    public function getInitRef()
+    {
+        return $this->initRef;
     }
 
      /**
@@ -313,6 +352,16 @@ class File extends BaseEntity
      * @return boolean 
      */
     public function getIsNew()
+    {
+        return $this->isNew;
+    }
+
+    /**
+     * Get isNew
+     *
+     * @return boolean 
+     */
+    public function isNew()
     {
         return $this->isNew;
     }
@@ -675,6 +724,30 @@ class File extends BaseEntity
     {
         return $this->cropBoxData;
     }
+
+    /**
+     * Set toRemove
+     *
+     * @param integer $toRemove
+     * @return File
+     */
+    public function setToRemove($toRemove)
+    {
+        $this->toRemove = $toRemove;
+
+        return $this;
+    }
+
+    /**
+     * Get toRemove
+     *
+     * @return integer 
+     */
+    public function getToRemove()
+    {
+        return $this->toRemove;
+    }
+
 
 
 }

@@ -12,11 +12,13 @@ use Knp\DoctrineBehaviors\ORM\AbstractSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Parabol\FilesUploadBundle\Entity\File;
+use Symfony\Component\Filesystem\Filesystem;
+use Doctrine\ORM\EntityManager;
 
 class FileRelationSubscriber implements EventSubscriber
 {
 
-    private $container, $analizer, $files = [], $values = [];
+    private $container, $analizer, $files = [], $managed = false;
 
     public function __construct($container, $analizer)
     {
@@ -32,42 +34,70 @@ class FileRelationSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            Events::prePersist,
+            // Events::prePersist,
+            // Events::preUpdate,
             Events::loadClassMetadata,
-            Events::postFlush,
+            // Events::postFlush,
             Events::onFlush,
+            Events::postPersist,
+            Events::postUpdate,
             Events::postRemove,
         );
     }
 
-    public function prePersist(LifecycleEventArgs $arg)
-    {
-        $this->removeOldFileIfSingleFileInput($arg);
-        // $this->addFileToRefObject($arg);
-    }
-
-    private function removeOldFileIfSingleFileInput(LifecycleEventArgs $arg)
-    {
-        //  $entity = $arg->getEntity();
-        //  if($entity instanceof File)
-        //  {
-        //     $class = $entity->getClass();
-        //     $em = $arg->getEntityManager();
-        //     if($class && !$class::isMultipleFilesAllowed($entity->getContext()) && $entity->getRef()
-        //        && $oldFile = $em->getRepository(File::class)->findOneBy(['ref' => $entity->getRef(), 'class' => $class, 'context' => $entity->getContext()])) {
-        //             $em->remove($oldFile);
-        //     }
-        // }
-
-    }
-
-    // private function addFileToRefEntity(LifecycleEventArgs $arg)
+    // public function prePersist(LifecycleEventArgs $args)
     // {
-    //      $entity = $arg->getEntity()
+        
+    // }
+
+    // public function preUpdate(LifecycleEventArgs $args)
+    // {
+    //     // $entity = $args->getEntity();
+    //     // if($entity instanceof \Parabol\AdminCoreBundle\Entity\Page)
+    //     // {
+    //     //     var_dump($entity->getFilesOrder());
+    //     // }
+    //     // die();
+    //     // $this->removeOldFileIfSingleFileInput($args);
+    //     // $this->addFileToRefObject($args);
+    // }
+
+    private function removeOldFileIfSingleFileInput(EntityManager $em, File $file)
+    {
+         
+            $class = $file->getClass();
+            
+
+            if($class && !$class::isMultipleFilesAllowed($file->getContext()) && $file->hasAssociation())
+            {
+                $oldfiles  =  $em->getRepository('ParabolFilesUploadBundle:File')->createQueryBuilder('f')
+                        ->select('f')
+                        ->where('f.ref = :ref')
+                        ->andWhere('f.class = :class')
+                        ->andWhere('f.context = :context')
+                        ->andWhere('f.id != :id')
+                        ->setParameters(['ref' => $file->getRef(), 'class' => $class, 'context' => $file->getContext(), 'id' => $file->getId()])
+                        ->getQuery()
+                        ->getResult()
+                    ;
+
+
+                foreach ($oldfiles as $oldfile) {
+                    $em->remove($oldfile);
+                }
+                    //$oldFile = $em->getRepository(File::class)->findOneBy(['ref' => $entity->getRef(), 'class' => $class, 'context' => $entity->getContext()])
+            }
+        
+
+    }
+
+    // private function addFileToRefEntity(LifecycleEventArgs $args)
+    // {
+    //      $entity = $args->getEntity()
     //      if($entity instanceof File)
     //      {
     //         $class = $entity->getClass();
-    //         $em = $arg->getEntityManager();
+    //         $em = $args->getEntityManager();
     //         if($class)
     //         {
     //             $refEntity = $this->getDoctrine()->getRepository( $class )->find( $entity->getRef() );
@@ -137,67 +167,102 @@ class FileRelationSubscriber implements EventSubscriber
         }
     }
 
-    public function postFlush(PostFlushEventArgs $args)
+
+    public function postPersist(LifecycleEventArgs $args)
     {
 
-        // throw new \Exception("Error Processing Request", 1);
+        $this->manageFiles($args->getEntityManager(), $args->getEntity(), 'new');
+        $this->updateFilesOrder($args->getEntityManager(), $args->getEntity());
+    }
+
+    public function postUpdate(LifecycleEventArgs $args)
+    {
+
+        $this->updateFilesOrder($args->getEntityManager(), $args->getEntity());
         
-        if(!empty($this->files))
+    }
+
+
+    private function hasFilesTrait($entity)
+    {
+        $refClass = new \ReflectionClass($entity);
+        return $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) 
+                || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class);
+        
+    }
+
+    private function updateFilesOrder(EntityManager $em, $entity)
+    {
+
+        if( $this->hasFilesTrait($entity) )
         {
-            $em  = $args->getEntityManager();
+            // var_dump($entity->getFilesOrder());
+            // die();
+            foreach($entity->getFilesOrder() as $context => $order)
+            {
+                if($order['values'])
+                {
 
-            // $dir = $this->container->get('parabol.utils.path')->getWebDir();
-
-            
-            foreach ($this->files as $context => $files) {
-
-                // if(!isset($this->values[$context])) $this->values[$context] = '';
-
-                // var_/dump($files);
-
-                foreach ($files as $file) {
-
-                    // $newDir =  dirname(strtr(preg_replace('#\/'.$this->object->getId().'#', '', $file->getPath()), ['/' . strtolower($context) . '/' => '/' . strtolower($context) . '/' . $this->object->getId() . '/']));
+                    $q = ''; $params = [];
                     
-                    // if(!file_exists($dir . $newDir)) mkdir($dir . $newDir, 0777, true);
+                    foreach ($order['values'] as $id => $sort) {
+                       $q .= ",(?, ?)";
+                       $params[] = $id;                        
+                       $params[] = $sort;
+                    }
 
-                    // if($newDir !== dirname($file->getPath()))
-                    // {
-                    //         $orgName = $slugizedName = basename($file->getPath());
-
-                    //         $i = 1;
-                    //         while(file_exists($dir . $newDir . DIRECTORY_SEPARATOR . $slugizedName))
-                    //         {
-                    //             $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
-                    //             $i++;
-                    //         }
-
-                    //         $file->setPath($newDir . DIRECTORY_SEPARATOR . $slugizedName);
-                    // }
-                   
-                    $file
-                        ->setRef($this->object->getId())
-                        ->setIsNew(false)
-                        ;
-                
-
-                    // $this->values[$context] .= ($this->values[$context] ? "," : "") . "({$file->getId()}, {$this->object->getId()})";
-                }
-
-
-
-
+                    $stmt = $em->getConnection()
+                        ->prepare("INSERT IGNORE INTO parabol_file (id, sort) VALUES " . trim($q, ',') . " ON DUPLICATE KEY UPDATE sort=VALUES(sort) ")
+                        ->execute($params);
+                } 
             }
 
-            $this->files = [];      
-            $em->flush();
+        }
+            
+        
+
+        // // throw new \Exception("Error Processing Request", 1);
+        
+        // if(!empty($this->files))
+        // {
+        //     $em  = $args->getEntityManager();
+
+        //     foreach ($this->files as $context => $files) {
+
+        //         // if(!isset($this->values[$context])) $this->values[$context] = '';
+
+        //         // var_/dump($files);
+
+        //         // $num = count($files);
+
+        //         foreach ($files as $file) {
+
+        //             $newDir = strtr( dirname($file->getPath()), [ $file->getRef() => $this->object->getId() ] );
+        //             $filename = $this->container->get('parabol.helper.blueimp_file')->getUniqueFilename( $this->container->get('parabol.utils.path')->getWebDir() . $newDir, $file->getFilename());
+                    
+
+        //             $file
+        //                 ->setPath($newDir . DIRECTORY_SEPARATOR . $filename)
+        //                 ->setRef($this->object->getId())
+        //                 ->setIsNew(false)
+        //                 ;
+                
+        //         }
 
 
-            // $this->values = [];
+
+
+        //     }
+
+        //     $this->files = [];      
+        //     $em->flush();
+
+
+        //     // $this->values = [];
 
 
     
-        }
+        // }
            
             
     }
@@ -206,92 +271,30 @@ class FileRelationSubscriber implements EventSubscriber
 
         $em  = $args->getEntityManager();
         $uow = $em->getUnitOfWork();
+        // $sessionId = $this->container->get('session')->getId();
+        // $fs = new Filesystem();
         
 
-        foreach ($uow->getScheduledEntityInsertions() as $inserted) {
-            $refClass = new \ReflectionClass($inserted);
+        // foreach ($uow->getScheduledEntityInsertions() as $inserted)
+        // {
+        //     if($this->hasFilesTrait($inserted))
+        //     {
+        //         $this->object = $inserted;
+        //     }
+            
+        // } 
 
-            if($this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class))
-            {
-
-                $class = $refClass->name;
-                $sessionId = $this->container->get('session')->getId();
-                $this->object = $inserted;
-
-                foreach($this->object->getFilesContexts() as $context)
-                {
-                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 'class' => $class, 'context' => $context, 'isNew' => true));  
-                        $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
-
-                    // // $uow->recomputeSingleEntityChangeSet( $em->getClassMetadata( $class ), $this->object);
-       
-                    
-                }
-
-                
-
-            } 
+        foreach ($uow->getScheduledEntityUpdates() as $updated)
+        {
+            
+            $this->manageFiles($em, $updated);
             
         }
 
-        // var_dump($this->files);
-// die();
-        
-
-
-        foreach ($uow->getScheduledEntityUpdates() as $updated) {
-            $refClass = new \ReflectionClass($updated);
-
-            var_dump(get_class($updated), $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, Parabol\FilesUploadBundle\Entity\Base\File::class));
-
-            if($this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class))
+        foreach ($uow->getScheduledEntityDeletions() as $deleted) 
+        {
+            if($this->hasFilesTrait($deleted))
             {
-                var_dump('file process');
-                $class = $refClass->name;
-                $this->object = $updated; die();
-                foreach($this->object->getFilesContexts() as $context)
-                {
-                    $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 'class' => $class, 'context' => $context, 'isNew' => true));
-
-                    // $this->files[$context] = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $updated->getId(), 'class' => get_class($updated), 'context' => $context));
-                    // if($this->object->{'get' . ucfirst($context)}() == null) $this->object->{'set' . ucfirst($context)}(new \Doctrine\Common\Collections\ArrayCollection($this->files[$context]));
-                }
-
-               //  var_dump($_POST, $this->object->getFiles());
-               // die();
-
-            }
-
-             die();
-        //     elseif($updated instanceof File)
-        //     {
-        //         $changeSet = $uow->getEntityChangeSet($updated);
-        //         if(isset($changeSet['path']))
-        //         {
-        //             $web_dir = $this->container->get('parabol.utils.path')->getWebDir();    
-                    
-        //             if(file_exists($web_dir . $changeSet['path'][0]))
-        //             {
-        //                 $dir = $web_dir . dirname($changeSet['path'][1]);
-        //                 if(!file_exists($dir)) mkdir($dir, 0777, true);
-
-        //                 $oldCropped = preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][0]);
-        //                 if(file_exists($web_dir . $oldCropped)) rename($web_dir . $oldCropped, $web_dir .  preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $changeSet['path'][1]));
-        //                 rename($web_dir . $changeSet['path'][0], $web_dir . $changeSet['path'][1]);
-
-        //             }
-
-        //         }
-                
-        //     }
-        }
-
-
-        foreach ($uow->getScheduledEntityDeletions() as $deleted) {
-            $refClass = new \ReflectionClass($deleted);
-            if(empty($this->files) && $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\Files') || $this->analizer->hasTrait($refClass, 'Parabol\FilesUploadBundle\Entity\Base\File'))
-            {
-
                 $files = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $deleted->getId(), 'class' => get_class($deleted)));
                 foreach($files as $file)
                 {
@@ -305,13 +308,112 @@ class FileRelationSubscriber implements EventSubscriber
     }
 
 
+    private function manageFiles(EntityManager $em, $entity, $action = 'edit')
+    {
+        if($this->hasFilesTrait($entity))
+        {
+            $uow = $em->getUnitOfWork();
+            $sessionId = $this->container->get('session')->getId();
+            $class = get_class($entity);
+
+            $files = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 'class' => $class, 'isNew' => true));
+
+            if(count($files))
+            {
+
+                foreach ($files as $file) {
+
+                    $file
+                        ->setPath($this->getNewPathAndMove($entity, $file))
+                        ->setRef($entity->getId())
+                        ->setIsNew(false)
+                    ;
+
+                    if($action === 'edit')
+                    {
+                        $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(File::class), $file);
+                        $entity->__addFile($file, $file->getContext());
+                    }
+
+                    $this->removeOldFileIfSingleFileInput($em, $file);
+
+                }
+
+                if($action === 'edit') $uow->recomputeSingleEntityChangeSet($em->getClassMetadata($class), $entity);
+
+            }
+            
+            if($action === 'new')
+            {
+                $em->flush();
+            }
+            else
+            {
+                $filesToRemove = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('toRemove' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $entity->getId()), 'class' => $class, 'isNew' => false));
+
+                foreach($filesToRemove as $file)
+                {
+                    $uow->scheduleForDelete($file);    
+                } 
+            }
+        }
+    }
+
+    private function getNewPathAndMove($entity, File $file)
+    {
+            $fs = new Filesystem();
+
+            $newDir = strtr( dirname($file->getPath()), [ $file->getRef() => $entity->getId() ] );
+            $filename = $this->container->get('parabol.helper.blueimp_file')->getUniqueFilename( $this->container->get('parabol.utils.path')->getWebDir() . $newDir, $file->getFilename());
+        
+            $oldPath = $file->getPath();
+            $newPath = $newDir . DIRECTORY_SEPARATOR . $filename;
+
+            $webdir = $this->container->get('parabol.utils.path')->getWebDir();    
+            if($fs->exists($webdir . $oldPath))
+            {
+                $dir = $webdir . dirname($newPath);
+                if(!$fs->exists($dir)) $fs->mkdir($dir);
+
+                // $oldCropped = preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $oldPath);
+                // if($fs->exists($webdir . $oldCropped)) $fs->rename($webdir . $oldCropped, $webdir .  preg_replace('/(\.[\w\d]{3})$/', '-cropped$1', $newPath));
+                $fs->rename($webdir . $oldPath, $webdir . $newPath);
+
+                if($file->isImage())
+                { 
+                    $oldThumbPath = $this->container->get('parabol.utils.path')->trimHost(
+                                            $this->container->get('liip_imagine.cache.manager')->resolve($oldPath, 'admin_thumb')
+                                    );
+                    $newThumbPath = $this->container->get('parabol.utils.path')->trimHost(
+                                            $this->container->get('liip_imagine.cache.manager')->resolve($newPath, 'admin_thumb')
+                                    );
+
+                    if(!$fs->exists(dirname($webdir . $newThumbPath))) $fs->mkdir(dirname($webdir . $newThumbPath));
+
+                    $fs->rename(
+                        $webdir . $oldThumbPath, 
+                        $webdir . $newThumbPath, 
+                        true
+                    );
+
+                    if( count(glob($webdir . dirname($oldThumbPath) . '/*' )) === 0 ) $fs->remove($webdir . dirname($oldThumbPath));
+                }
+                
+                if( count(glob($webdir . dirname($oldPath) . '/*' )) === 0 ) $fs->remove($webdir . dirname($oldPath));
+            }
+
+            return $newPath;
+    }
+
+
     public function postRemove(LifecycleEventArgs $args) { 
         
-        if($args->getObject() instanceof File)
+        $entity = $args->getEntity();
+        if($entity instanceof File)
         {
-            $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getPath());
-            if($args->getObject()->getCropBoxData()) $this->container->get('liip_imagine.cache.manager')->remove($args->getObject()->getCroppedPath());
-            $path = $this->container->get('parabol.utils.path')->getWebDir().$args->getObject()->getPath();
+            $this->container->get('liip_imagine.cache.manager')->remove($entity->getPath());
+            if($entity->getCropBoxData()) $this->container->get('liip_imagine.cache.manager')->remove($entity->getCroppedPath());
+            $path = $this->container->get('parabol.utils.path')->getWebDir().$entity->getPath();
             if(file_exists($path)) unlink($path);
             @rmdir(dirname($path));
         }

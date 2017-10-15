@@ -31,7 +31,6 @@ class BlueimpFileHelper
             "deleteType" => "GET",
             "cropper" => $file->isImage(),
             "cropBoxData" => (array)$file->getCropBoxData(),
-
 		];
 
 		return $result;
@@ -40,6 +39,19 @@ class BlueimpFileHelper
 	public function generateRef($sessionId, $class)
 	{
 		return '_'.hash('sha256', $sessionId . '|' . $class);
+	}
+
+	public function getUniqueFilename($dir, $filename)
+	{
+		$i = 1;
+           
+        while(file_exists($dir . DIRECTORY_SEPARATOR . $filename))
+        {
+            $filename = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $filename);
+            $i++;
+        }
+
+        return $filename;
 	}
 
 

@@ -19,8 +19,10 @@ class BlueimpController extends Controller
         $response = new JsonResponse();
         $class = $request->get('class');
         $context = $request->get('context');
-        
-        $path = trim($request->get('path') ? $request->get('path') : $context . '/' . ($request->get('ref') ?  $request->get('ref') : '') , '/');
+        $fileHelper = $this->get('parabol.helper.blueimp_file');
+        $ref = $fileHelper->generateRef($request->getSession()->getId(), $class);
+
+        $path = trim($request->get('path') ? $request->get('path') : $context . '/' . $ref , '/');
         $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path);
         if(!file_exists($dir)) mkdir($dir, 0777, true);
 
@@ -31,31 +33,23 @@ class BlueimpController extends Controller
         foreach($uploadedfiles as $uploadedfile)
         {
                
-            $orgName = $slugizedName  = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $uploadedfile->getClientOriginalName())) . '.'. strtolower($uploadedfile->getClientOriginalExtension());
+            $filename = PathUtil::slugize( preg_replace('#(\.[a-z]+)$#', '', $uploadedfile->getClientOriginalName())) . '.'. strtolower($uploadedfile->getClientOriginalExtension());
 
             $em = $this->getDoctrine()->getManager();
 
             if($context !== 'cropper')
             {
-                $i = 1;
-           
-                while(file_exists($dir . DIRECTORY_SEPARATOR . $slugizedName))
-                {
-                    $slugizedName = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgName);
-                    $i++;
-                }
-
-
-                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR).$slugizedName;
-
-                $fileHelper = $this->get('parabol.helper.blueimp_file');
+                
+                $filename = $fileHelper->getUniqueFilename($dir, $filename);
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path, DIRECTORY_SEPARATOR) . $filename;
 
                 $file = (new File())
                         ->setPath($path)
                         ->setContext($context)
                         ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType())
                         ->setClass($class ? $class : null)
-                        ->setRef( $fileHelper->generateRef($request->getSession()->getId(), $class) );
+                        ->setRef( $ref )
+                        ->setInitRef( $request->get('ref') );
 
                 $errors = $this->validate($uploadedfile, $file, $request);
 
@@ -69,20 +63,8 @@ class BlueimpController extends Controller
                 else
                 {
 
-                    $uploadedfile->move($dir, $slugizedName);
+                    $uploadedfile->move($dir, $filename);
                     $em->persist($file);
-
-                    // if($class)
-                    // {
-                    //     $obj = $this->getDoctrine()->getRepository($class)->find($request->get('ref'));
-                    //     if($obj) $obj->__addFile($file, $context);
-                    // }
-
-                    // if($class && !$class::isMultipleFilesAllowed($context) && $request->get('ref') 
-                    //    && $oldFile = $em->getRepository('ParabolFilesUploadBundle:File')->findOneBy(['ref' => $request->get('ref'), 'class' => $class, 'context' => $context])) {
-                    //         $em->remove($oldFile);
-                    // }
-
                     $em->flush();
 
                     if($file->isImage())
@@ -108,8 +90,8 @@ class BlueimpController extends Controller
             }
             else
             {
-                $uploadedfile->move($dir, $slugizedName);
-                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR) . $slugizedName;
+                $uploadedfile->move($dir, $filename);
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR) . $filename;
 
                 if($request->get('orginalFilePath') && $request->get('cropperBoxData') !== null)
                 {
@@ -187,38 +169,57 @@ class BlueimpController extends Controller
         $result = array();
 
         $params = $request->query->get('params');
-        $params['hash'] = '_'.hash('sha256', $this->get('session')->getId().'|'.$params['class']);
+        $params['hash'] = $this->get('parabol.helper.blueimp_file')->generateRef($this->get('session')->getId(), $params['class']);
+        $toRemove = $this->get('parabol.helper.blueimp_file')->generateRef($this->get('session')->getId(), $params['ref']);
 
         $em = $this->getDoctrine()->getManager();
 
-        // if($request->query->get('type') == 'edit')
-        // {
-        //     $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
-        //     foreach($oldFiles as $oldFile)
-        //     {
-        //         $em->remove($oldFile);
-        //     }
+        if(in_array($request->query->get('type'), ['new','edit']))
+        {
+            $oldFiles = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $params['hash'], 'class' => $params['class']));
+            foreach($oldFiles as $oldFile)
+            {
+                $em->remove($oldFile);
+            }
+            $em->flush();
 
-        //     $em->flush();
+            $em ->getRepository('ParabolFilesUploadBundle:File')
+                ->createQueryBuilder('f')
+                ->update()
+                ->set('f.toRemove', 'NULL')
+                ->where('f.toRemove = :toRemove')
+                ->setParameter('toRemove', $toRemove)
+                ->getQuery()
+                ->getResult();
 
-
-        // }
+        }
         
-        $files = $em
+        $qb = $em
                 ->getRepository('ParabolFilesUploadBundle:File')
                 ->createQueryBuilder('f')
                 ->where('f.class = :class')
                 ->andWhere('f.context = :context')
                 ->andWhere('f.ref = :ref OR f.ref = :hash')
                 ->orderBy('f.sort', 'DESC')
-                ->setParameters($params)
-                ->getQuery()
-                ->execute();
+                ->addOrderBy('f.id', 'DESC')
+                
+        ;
 
+        if(in_array($request->query->get('type'), ['create','update']))
+        {
+            $params['toRemove'] = $toRemove;
+            $qb
+                ->andWhere('f.toRemove IS NULL or f.toRemove != :toRemove')
+            ;
+        }
+        
+        $files = $qb->setParameters($params)->getQuery()->execute();
 
         foreach($files as $file)
         {
             $result[] = $this->get('parabol.helper.blueimp_file')->toArray($file);
+            if(!$params['class']::isMultipleFilesAllowed($params['context'])) break;
+
         }
 
         $response = new JsonResponse();
@@ -235,36 +236,50 @@ class BlueimpController extends Controller
                 ->where('f.id = :id')
                 ->setParameter(':id', $request->get('id'))
                 ->getQuery()
-                ->getSingleResult();
+                ->getOneOrNullResult();
 
-        $em = $this->getDoctrine()->getManager();        
+        if($file)
+        {
+            $em = $this->getDoctrine()->getManager();        
 
-        $em->remove($file);
-        $em->flush();
-    
-        $response = new JsonResponse();
-        $response->setData(true);
-        
-        return $response;   
+            if($request->get('immediately') || $file->isNew()) $em->remove($file);
+            else $file->setToRemove($this->get('parabol.helper.blueimp_file')->generateRef( $this->get('session')->getId(), $file->getRef()) );
+            
+            $em->flush($file);
+
+            $response = new JsonResponse();
+            $response->setData(true);
+            
+            return $response;   
+            
+        }
+        else
+        {
+            return $this->createNotFoundException();
+        }
+
     }
 
-    public function updatePositionAction(Request $request)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $file = $em
-                ->getRepository('ParabolFilesUploadBundle:File')
-                ->find($request->get('id'));
+    // public function updatePositionAction(Request $request)
+    // {
+    //     // $this->
+
+    //     //$this->get('session')->set('parabol_file_upload_bundle');
+    //     // $em = $this->getDoctrine()->getManager();
+    //     // $file = $em
+    //     //         ->getRepository('ParabolFilesUploadBundle:File')
+    //     //         ->find($request->get('id'));
         
-        if (!$file) {
-            throw $this->createNotFoundException(
-                'No file found for id '.$id
-            );
-        }        
+    //     // if (!$file) {
+    //     //     throw $this->createNotFoundException(
+    //     //         'No file found for id '.$id
+    //     //     );
+    //     // }        
 
-        $file->setSort($request->get('sort'));
-        $em->flush();
+    //     // $file->setSort($request->get('sort'));
+    //     // $em->flush();
 
-        return new JsonResponse(array('result' => 'success'));
-    }
+    //     return new JsonResponse(array('result' => 'success'));
+    // }
 
 }
