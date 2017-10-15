@@ -17,7 +17,7 @@ class BlueimpType extends AbstractType
     {
         $resolver->setDefaults(array(
                 'description' => 'default',
-                // 'multiple' => false,
+                'multiple' => false,
                 'edditable'=> false,
                 'error_bubbling' => false,
                 'compound' => false,

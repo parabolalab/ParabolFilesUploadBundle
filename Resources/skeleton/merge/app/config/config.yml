@@ -1,0 +1,3 @@
+twig:
+    form_themes:
+        - ParabolFilesUploadBundle:Form:field_type_blueimp_upload.html.twig
