@@ -32,6 +32,8 @@ class BlueimpType extends AbstractType
                 'thumb' => [
                     'onclick' => null
                 ],
+                'uploadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:upload-template.js.tmpl',
+                'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
         ));
     }
 
@@ -77,6 +79,9 @@ class BlueimpType extends AbstractType
         $view->vars['attr']['data']['class'] = $options['class'];
         $view->vars['attr']['data']['ref'] = $options['ref'];
         $view->vars['thumb'] = $options['thumb'];
+        $view->vars['uploadTemplate'] = $options['uploadTemplate'];
+        $view->vars['downloadTemplate'] = $options['downloadTemplate'];
+
         $view->vars['allowed_remove_pattern'] = $options['allowed_remove_pattern'];
         $view->vars['cropperAssigned'] = self::$cropperAssigned;
         self::$cropperAssigned = true;

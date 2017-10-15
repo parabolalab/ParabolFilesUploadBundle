@@ -1,8 +1,7 @@
 {% trans_default_domain "Admingenerator" %}
 
 {% block blueimp_upload_widget %}
-    {# {{ dump(form.vars) }} #}
-    <div class="form-group">
+<div class="form-group">
     <div id="{{ form.vars.name }}-fileupload" class="fileupload" data-url="{{ path('parabol_uploader') }}" >
         <div class="row">
             <div class="col-lg-12">
@@ -19,15 +18,24 @@
         <div class="row">
         <div class="col-lg-2 col-md-3 col-md-4">
     	<span class="btn btn-primary fileinput-button">
-            <i class="glyphicon glyphicon-plus"></i> 
-            &nbsp;<span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
+            <i class="glyphicon glyphicon-plus"></i>&nbsp; <span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
             <!-- The file input field used as target for the file upload widget -->
-            <input id="{{ form.vars.name }}-fileuploadInput" class="fileupload-input" type="file" {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }} name="{{ form.vars.name }}[]" data-context="{{ form.vars.name }}" data-type="{{ app.request.pathInfo|split('/')|last }}" {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %} {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %} data-url="{{ path('parabol_uploader') }}" data-acceptmimetypes="{{ form.vars.acceptMimeTypes | join('|') }}" accept="{{ form.vars.acceptMimeTypes | join(',') }}" />
+            <input 
+                id="{{ form.vars.name }}-fileuploadInput" 
+                class="fileupload-input" 
+                type="file" 
+                {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }}
+                name="{{ form.vars.name }}[]" 
+                data-context="{{ form.vars.name }}" 
+                data-type="{{ app.request.pathInfo|split('/')|last }}" 
+                {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
+                {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %}
+                data-url="{{ path('parabol_uploader') }}" 
+                data-acceptmimetypes="{{ form.vars.acceptMimeTypes | join('|') }}"
+                accept="{{ form.vars.acceptMimeTypes | join(',') }}" 
+            />
         </span>
         </div>
-
-        
-        
 
         <div class="col-sm-8 fileupload-progress fade">
                 <!-- The global progress bar -->
@@ -55,103 +63,22 @@
     </div>
 </div>
 
+{% include 'ParabolFilesUploadBundle:BlueimpTemplates:_templatesAdapter.html.twig' with {from: form} %}
 
-<!-- The template to display files available for upload -->
-<script id="template-upload" type="text/x-tmpl">
-{% verbatim %}   
-{% for (var i=0, file; file=o.files[i]; i++) { %}
-    <div class="btn btn-default template-upload fade">      
-            <span class="preview"></span>
-            
-            
-            <div style="white-space: normal; text-align:center; margin-top: 33%;"><span class="error"></span></div>
-            
-            {% if (!i && !o.options.autoUpload) { %}
-                <button class="btn btn-primary btn-xs start"  style="position: absolute; top: 30px; right: 5px;">
-                    <i class="glyphicon glyphicon-upload"></i>
-                </button>
-            {% } %}
-            {% if (!i) { %}
-                <button class="btn btn-danger btn-xs cancel" style="position: absolute; top: 5px; right: 5px;">
-                    <i class="glyphicon glyphicon-trash"></i>
-                </button>
-            {% } %}
-    </div>
-{% } %}
-{% endverbatim %} 
-</script>
-<!-- The template to display files available for download -->
-<script id="template-download" type="text/x-tmpl">
-{% verbatim %}   
-{% for (var i=0, file; file=o.files[i]; i++) { %}
-{% endverbatim %}   
-    <li class="btn btn-default template-download {% verbatim %}{% if (file.error) { %}error{% } %}{% endverbatim %}" {{ form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : '' }}
-{% verbatim %}   
-    data-file="{%=file.url%}" data-width="{%=file.width%}" data-height="{%=file.height%}" data-id="{%=file.id%}" data-sort="{%=file.sort%}"> 
-         <input type="hidden" name="uploaded_files[]" value="{%=file.id%}" />
-         <div style="position: relative">        
-            
-                {% if (file.thumbnailUrl) { %}
-                <span class="preview" style="background-image: url({%=file.thumbnailUrl%});">
-                    
-                </span>
-                {% } %}
-                {% if (file.width) { %}
-                <small class="sizes">{%=file.width%}px x {%=file.height%}px</small>
-                {% } %}
-            {% if (file.error) { %}
-                <div><span class="label label-danger" style="position: absolute;left: 0;top: 79px;">Error</span></div>
-            {% } %}
-            <div style="position: absolute; top: 5px; right: 5px;">
-            {% if (file.thumbnailUrl) { %}
-                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
-                    <i class="ion ion-edit"></i>
-                </button>
 
-            {% if (file.cropper) { %}
-            {% endverbatim %}     
-                <button  
-                {% verbatim %}
-                    data-width="{%=file.width%}" 
-                    data-height="{%=file.height%}" 
-                    data-crop-width="{%=file.cropBoxData.width%}" 
-                    data-crop-height="{%=file.cropBoxData.height%}" 
-                    data-crop-left="{%=file.cropBoxData.left%}" 
-                    data-crop-top="{%=file.cropBoxData.top%}" 
-                {% endverbatim %}
-                class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px"  onclick="return $(this).admin_core_showCropper($(this));" >
-                    <i class="fa fa-crop"></i>
-                </button>
-            {% verbatim %}  
-            {% } %} 
-
-                {% if (file.deleteUrl) { %}
-                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %} {% endverbatim %}{{ form.vars.thumb.onclick ? 'onclick=browser_removeFile($(this))' : '' }}{% verbatim %}>
-                    <i class="ion ion-trash-b"></i>
-                </button>
-                {% } %}    
-            {% } else { %}
-
-                {% if (file.error) { %}
-                <button class="btn btn-default btn-xs" style="padding: 2px 6px 1px" onclick="return false" data-toggle="tooltip" title="{%=file.name%}: {%=file.error%}">
-                    <i class="fa fa-exclamation-triangle"></i>
-                </button>
-                {% } %}
-
-                <button class="btn btn-danger btn-xs cancel" style="margin-left: 4px;">
-                    <i class="glyphicon glyphicon-remove"></i>
-                </button>
-            {% } %}
-            </div>
-        </div>
-    </li>
-{% } %}
-</script>
+{# 
+    {{ form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : '' }}
+    {{ form.vars.thumb.onclick ? 'onclick=browser_removeFile($(this))' : '' }}
+ #}
 
 
 
 
-{% endverbatim %}
+
+{#
+
+
+
 
 <script>
 
@@ -164,18 +91,9 @@
  
 </script>
 
-<style>
-    {% if form.vars.cropper %}
-        #{{ form.vars.name }}-fileupload button.edit { display: none; }
-    {% else %}
-    {% if form.vars.edditable == false %} #{{ form.vars.name }}-fileupload button.edit { display: none; } {% endif %}
-    #{{ form.vars.name }}-fileupload button.crop { display: none; }
-    {% endif %}
 
 
-</style>
-
-{% if 1 == 0 and form.vars.cropper and form.vars.cropperAssigned == false %}
+{% if form.vars.cropper and form.vars.cropperAssigned == false %}
 
 
 <div id="cropper">
@@ -186,13 +104,13 @@
     <img id="image" src="">
   </div>
   <div class="cropper-bar" style="margin-left: -43px;">
-    {# <i class="fa fa-arrows"></i> #}
+    <!-- <i class="fa fa-arrows"></i> -->
     <i class="fa fa-crop active"></i>
-    {# <i class="fa fa-arrows-alt"></i> #}
-    {# <i class="fa fa-search-minus"></i>
-    <i class="fa fa-search-plus"></i> #}
-  {#   <i class="fa fa-undo"></i>
-    <i class="fa fa-repeat"></i> #}
+    <!-- <i class="fa fa-arrows-alt"></i> 
+    <i class="fa fa-search-minus"></i>
+    <i class="fa fa-search-plus"></i> 
+    <i class="fa fa-undo"></i>
+    <i class="fa fa-repeat"></i> -->
     <i class="fa fa-arrows-h"></i>
     <i class="fa fa-arrows-v"></i>
     <i class="fa fa-save"></i>
@@ -232,18 +150,19 @@
                     </label>
                   </div>
               </div>
-              {# <div class="row">
+              <!--<div class="row">
                   <div class="checkbox col-xs-12">
                     <label>
                       <input type="checkbox" name="override" value="1" checked="checked"> {% trans %}Override the File{% endtrans %}
                     </label>
                   </div>
-              </div> #}
+              </div> -->
             </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
-            <button type="button" class="btn btn-primary" data-action="{#{ path('parabol_uploader_resize') }#}">{% trans %}Resize{% endtrans %}</button>
+            <!--<button type="button" class="btn btn-primary" data-action="{ path('parabol_uploader_resize') }" >{% trans %}Resize{% endtrans %}</button>-->
+            <button type="button" class="btn btn-primary" data-action="" >{% trans %}Resize{% endtrans %}</button>
           </div>
         </div>
       </div>
@@ -634,9 +553,10 @@ cropperSetting[fileuploadId].minCropBoxHeight)
     }
 
 </script>
-{# {% set form.devCropper = true %} #}
-{# {{ dump(form) }} #}
+
 
 {% endif %}
+
+#}
 
 {% endblock blueimp_upload_widget %}

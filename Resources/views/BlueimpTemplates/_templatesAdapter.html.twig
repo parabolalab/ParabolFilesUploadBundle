@@ -1,0 +1,16 @@
+
+{{ source(form.vars.uploadTemplate) | replace({
+                    '${context}': form.vars.name,
+                    '${thumb.onclick}': (form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : ''),
+                    '${cropper}': form.vars.cropper ? 'true' : 'false',
+                    '${edditable}': form.vars.edditable ? 'true' : 'false',
+                }) | raw
+}}
+
+{{ source(form.vars.downloadTemplate) | replace({
+                    '${context}': form.vars.name,
+                    '${thumb.onclick}': (form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : ''),
+                    '${cropper}': form.vars.cropper ? 'true' : 'false',
+                    '${edditable}': form.vars.edditable ? 'true' : 'false',
+                }) | raw
+}}

@@ -1,0 +1,57 @@
+<!-- The template to display files available for download -->
+<script id="${context}-template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <li class="btn btn-default template-download {% if (file.error) { %}error{% } %}" data-file="{%=file.url%}" data-width="{%=file.width%}" data-height="{%=file.height%}" data-id="{%=file.id%}" data-sort="{%=file.sort%}" ${thumb.onclick}> 
+
+         <input type="hidden" name="uploaded_files[]" value="{%=file.id%}" />
+
+         <div style="position: relative">        
+            
+            {% if (file.thumbnailUrl) { %}<span class="preview" style="background-image: url({%=file.thumbnailUrl%});"></span>{% } %}
+            {% if (file.width) { %}<small class="sizes">{%=file.width%}px x {%=file.height%}px</small>{% } %}
+        	{% if (file.error) { %}<div><span class="label label-danger" style="position: absolute;left: 0;top: 79px;">Error</span></div>{% } %}
+            <div style="position: absolute; top: 5px; right: 5px;">
+            {% if (file.thumbnailUrl) { %}
+
+            	{% if (${edditable}) { %}
+                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\AdminCoreBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
+               		<i class="ion ion-edit"></i>
+                </button>
+                {% } %} 
+            	
+            	{% if (${cropper} && file.cropper) { %}
+                <button  
+                    data-width="{%=file.width%}" 
+                    data-height="{%=file.height%}" 
+                    data-crop-width="{%=file.cropBoxData.width%}" 
+                    data-crop-height="{%=file.cropBoxData.height%}" 
+                    data-crop-left="{%=file.cropBoxData.left%}" 
+                    data-crop-top="{%=file.cropBoxData.top%}" 
+                	class="btn btn-default btn-light btn-xs crop" style="margin-left: 4px; padding: 2px 6px 1px" onclick="return $(this).admin_core_showCropper($(this));" >
+                    <i class="fa fa-crop"></i>
+                </button>
+            	{% } %} 
+
+                {% if (file.deleteUrl) { %}
+                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                    <i class="ion ion-trash-b"></i>
+                </button>
+                {% } %}    
+            
+            {% } else { %}
+                {% if (file.error) { %}
+                <button class="btn btn-default btn-xs" style="padding: 2px 6px 1px" onclick="return false" data-toggle="tooltip" title="{%=file.name%}: {%=file.error%}">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </button>
+                {% } %}
+
+                <button class="btn btn-danger btn-xs cancel" style="margin-left: 4px;">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </button>
+            {% } %}
+            </div>
+        </div>
+    </li>
+{% } %}
+</script>
+

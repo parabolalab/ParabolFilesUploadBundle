@@ -36,6 +36,7 @@ $(document).ready(function () {
 			$('.fileupload').each(function(){
 
 				var id = $(this).attr('id');
+				var filecontext = id.replace('-fileupload', '');
 				sortableNewValues[id] =  {'values': {}, length: 0}
 				var files_error = false;
 				$('.alert.alert-danger li').each(function(){
@@ -54,10 +55,12 @@ $(document).ready(function () {
 				
 				var acceptmimetypes = new RegExp('(\.|\/)(' + $input.data('acceptmimetypes') + ')$', 'i')
 				
-				 $(this).fileupload({
+				$(this).fileupload({
 			       	dataType: 'json',
 			       	autoUpload: true,
 			        // acceptFileTypes: acceptmimetypes,
+			        downloadTemplateId: filecontext + '-template-download',
+			        uploadTemplateId: filecontext + '-template-upload',
 			        disableImageResize: true,
 			        previewMaxWidth: 100,
 			        previewMaxHeight: 100,
