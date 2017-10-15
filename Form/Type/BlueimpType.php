@@ -16,9 +16,8 @@ class BlueimpType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-                'labels' => [],
                 'description' => 'default',
-                'multiple' => false,
+                // 'multiple' => false,
                 'edditable'=> false,
                 'error_bubbling' => false,
                 'compound' => false,
@@ -30,7 +29,8 @@ class BlueimpType extends AbstractType
                 'required' => false,
                 'ref' => null,
                 'thumb' => [
-                    'onclick' => null
+                    'onclick' => null,
+                    'lables' => null
                 ],
                 'uploadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:upload-template.js.tmpl',
                 'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
@@ -79,6 +79,7 @@ class BlueimpType extends AbstractType
         $view->vars['attr']['data']['class'] = $options['class'];
         $view->vars['attr']['data']['ref'] = $options['ref'];
         $view->vars['thumb'] = $options['thumb'];
+        if(isset($options['thumb']['labels']) && $options['thumb']['labels'] !== null) $view->vars['thumb']['labels'] = (array) $options['thumb'];
         $view->vars['uploadTemplate'] = $options['uploadTemplate'];
         $view->vars['downloadTemplate'] = $options['downloadTemplate'];
 

@@ -28,7 +28,7 @@
                 name="{{ form.vars.name }}[]" 
                 data-context="{{ form.vars.name }}" 
                 data-type="{{ app.request.pathInfo|split('/')|last }}" 
-                {% for attrname, attrvalue in form.vars.attr if attrname not in ['labels', 'data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
+                {% for attrname, attrvalue in form.vars.attr if attrname not in ['data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
                 {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %}
                 data-url="{{ path('parabol_uploader') }}" 
                 data-acceptmimetypes="{{ form.vars.acceptMimeTypes | join('|') }}"
@@ -52,7 +52,7 @@
 
             <div role="presentation" class="col-lg-12 file-list">
                 {% if form.vars.attr.labels is defined %}
-                    {% for label in form.vars.attr.labels %}
+                    {% for label in form.vars.thumb.labels %}
                     <span class="label hidden">{{ label }}</span>
                     {% endfor %}
                 {% endif %}
