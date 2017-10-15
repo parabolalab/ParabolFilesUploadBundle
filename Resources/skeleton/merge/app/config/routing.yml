@@ -1,0 +1,5 @@
+parabol_admin_upload:
+    resource: '@ParabolFilesUploadBundle/Resources/config/routing.yml'
+    prefix:   /admin
+    options: { i18n: false }
+
