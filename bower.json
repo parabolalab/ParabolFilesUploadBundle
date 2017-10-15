@@ -1,0 +1,10 @@
+{
+    "name": "parbol-file-upload",
+    "version": "1.0",
+    "dependencies": {
+        "blueimp-file-upload": "~9"
+    },
+    "resolutions": {
+        "jquery": ">=1.9.1"
+    }
+}
