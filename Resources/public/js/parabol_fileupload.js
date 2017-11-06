@@ -95,7 +95,7 @@ $(document).ready(function () {
 				{
 
 					$.getJSON(
-						sf_env+'/_uploader/get', 
+						sf_env+'/admin/_uploader/get', 
 						{params: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context') }, type: $input.data('type') },
 						function (files) {
 

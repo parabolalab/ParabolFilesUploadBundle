@@ -28,6 +28,7 @@ class BlueimpType extends AbstractType
                 'allowed_remove_pattern' => null,
                 'required' => false,
                 'ref' => null,
+                'mapped' => false,
                 'thumb' => [
                     'onclick' => null,
                     'lables' => null
@@ -40,6 +41,8 @@ class BlueimpType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
+
+        // var_dump($options); die();
 
         $view->vars['description'] = $options['description'];
         $view->vars['attr']['multiple'] = $options['class'] ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : true;

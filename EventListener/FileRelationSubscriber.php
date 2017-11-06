@@ -211,6 +211,9 @@ class FileRelationSubscriber implements EventSubscriber
                        $params[] = $sort;
                     }
 
+                    var_dump("INSERT IGNORE INTO parabol_file (id, sort) VALUES " . trim($q, ',') . " ON DUPLICATE KEY UPDATE sort=VALUES(sort) ");
+
+
                     $stmt = $em->getConnection()
                         ->prepare("INSERT IGNORE INTO parabol_file (id, sort) VALUES " . trim($q, ',') . " ON DUPLICATE KEY UPDATE sort=VALUES(sort) ")
                         ->execute($params);
@@ -283,12 +286,9 @@ class FileRelationSubscriber implements EventSubscriber
         //     }
             
         // } 
-
         foreach ($uow->getScheduledEntityUpdates() as $updated)
-        {
-            
-            $this->manageFiles($em, $updated);
-            
+        {            
+            $this->manageFiles($em, $updated);            
         }
 
         foreach ($uow->getScheduledEntityDeletions() as $deleted) 
@@ -320,7 +320,7 @@ class FileRelationSubscriber implements EventSubscriber
 
             if(count($files))
             {
-
+                // foreach($entity->getFiles() as $f) var_dump($f);
                 foreach ($files as $file) {
 
                     $file
@@ -329,17 +329,16 @@ class FileRelationSubscriber implements EventSubscriber
                         ->setIsNew(false)
                     ;
 
-                    if($action === 'edit')
-                    {
-                        $uow->recomputeSingleEntityChangeSet($em->getClassMetadata(File::class), $file);
-                        $entity->__addFile($file, $file->getContext());
-                    }
-
+                    $entity->__addFile($file, $file->getContext());
                     $this->removeOldFileIfSingleFileInput($em, $file);
 
                 }
+                
 
-                if($action === 'edit') $uow->recomputeSingleEntityChangeSet($em->getClassMetadata($class), $entity);
+                if($action === 'edit')
+                {
+                    $uow->computeChangeSets();
+                } 
 
             }
             
@@ -356,6 +355,8 @@ class FileRelationSubscriber implements EventSubscriber
                     $uow->scheduleForDelete($file);    
                 } 
             }
+
+
         }
     }
 

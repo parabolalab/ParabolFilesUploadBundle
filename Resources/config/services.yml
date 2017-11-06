@@ -17,3 +17,8 @@ services:
         arguments:
             - "@router"
             - "@liip_imagine.cache.manager"
+
+    Parabol\FilesUploadBundle\Form\Base\Extension\AdminBaseTypeExtension:
+        arguments: [  ]
+        tags:
+            -  { name: parabol.admin_base_type_extension }
