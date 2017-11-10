@@ -196,8 +196,6 @@ class FileRelationSubscriber implements EventSubscriber
 
         if( $this->hasFilesTrait($entity) )
         {
-            // var_dump($entity->getFilesOrder());
-            // die();
             foreach($entity->getFilesOrder() as $context => $order)
             {
                 if($order['values'])
@@ -210,8 +208,6 @@ class FileRelationSubscriber implements EventSubscriber
                        $params[] = $id;                        
                        $params[] = $sort;
                     }
-
-                    var_dump("INSERT IGNORE INTO parabol_file (id, sort) VALUES " . trim($q, ',') . " ON DUPLICATE KEY UPDATE sort=VALUES(sort) ");
 
 
                     $stmt = $em->getConnection()
@@ -271,6 +267,7 @@ class FileRelationSubscriber implements EventSubscriber
     }
     public function onFlush(OnFlushEventArgs $args)
     {
+
 
         $em  = $args->getEntityManager();
         $uow = $em->getUnitOfWork();

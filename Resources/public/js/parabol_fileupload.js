@@ -17,11 +17,11 @@ $(document).ready(function () {
 					$(this).attr('data-sort', max - index)
 					sortableNewValues[id].length++;
 				})
+			}
 
-				console.log(sortableNewValues)
-
-				
-
+			function updateFilesUpdatedAt()
+			{
+				if($('input[id$=_filesUpdatedAt]').length) $('input[id$=_filesUpdatedAt]').val(moment().format('YYYY-MM-DD HH:mm:ss'))
 			}
 
 	   		if($('input[id$=filesOrder]').length)
@@ -31,7 +31,6 @@ $(document).ready(function () {
 	   			})	
 	   		}
 	   		
-
 
 			$('.fileupload').each(function(){
 
@@ -43,10 +42,6 @@ $(document).ready(function () {
 					if($(this).text().trim() == 'Files error') files_error = true;
 				})
 				if(files_error) $(this).find('.files-error').removeClass('hidden');
-
-
-
-
 
 				// acceptFileTypes = 
 
@@ -71,7 +66,8 @@ $(document).ready(function () {
 					if(!$('#' + id + '-files > li:last-child').hasClass('error'))
 					{
 						if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
-						if($('input[id$=_filesUpdatedAt]').length) $('input[id$=_filesUpdatedAt]').val(moment().format('YYYY-MM-DD HH:mm:ss'))
+						
+						updateFilesUpdatedAt()
 
 						if(sortableNewValues[id].length) renewSortableValues(id, $('ul#' + id + '-files'))
 			   	    	$('#' + id + ' .file-list .label:lt('+$('#' + id + ' .files > li').length+')').removeClass('hidden'); 
@@ -86,6 +82,7 @@ $(document).ready(function () {
 			    	if($input.data('order') == 'desc') $('#' + id + '-files > div:last-child').prependTo('#' + id + '-files');
 			    })
 				.on('fileuploaddestroyed', function (e, data) {
+					updateFilesUpdatedAt()
 					renewSortableValues(id, $('ul#' + id + '-files'))
 				})
 				;
@@ -93,7 +90,7 @@ $(document).ready(function () {
 
 				if($input.data('class'))
 				{
-
+					
 					$.getJSON(
 						sf_env+'/admin/_uploader/get', 
 						{params: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context') }, type: $input.data('type') },
@@ -121,6 +118,7 @@ $(document).ready(function () {
 								  $item.removeClass("dragged").removeAttr("style")
 								  $("body").removeClass("dragging")
 								  renewSortableValues(id, $(container.el))
+								  updateFilesUpdatedAt()
 
 
 
