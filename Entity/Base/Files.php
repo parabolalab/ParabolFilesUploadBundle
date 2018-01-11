@@ -79,11 +79,6 @@ trait Files {
         return $this;
     }
 
-    public static function allowMultipleFiles()
-    {
-        return isset(self::$allowMultipleFiles) ? self::$allowMultipleFiles : true;
-    }
-
     public static function fileContexts()
     {
     	return ['files' => true];

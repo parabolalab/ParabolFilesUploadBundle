@@ -196,7 +196,7 @@ class FileRelationSubscriber implements EventSubscriber
 
         if( $this->hasFilesTrait($entity) )
         {
-            foreach($entity->getFilesOrder() as $context => $order)
+            foreach((array)$entity->getFilesOrder() as $context => $order)
             {
                 if($order['values'])
                 {

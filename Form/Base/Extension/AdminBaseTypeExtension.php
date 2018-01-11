@@ -19,7 +19,6 @@ class AdminBaseTypeExtension  {
 
     public function postBuild($formType, array $options)
     {
-
         if($formType->getDataClass())
         {
             foreach ($formType->getDataClass()::fileContexts() as $key => $value) 
@@ -47,6 +46,7 @@ class AdminBaseTypeExtension  {
         {
             $fieldOptions['multiple'] = true;
         } 
+
 
         //if(!isset($fieldOptions['attr']['labels'])) $fieldOptions['attr']['labels'] = [];
         $fieldOptions['class'] = $class;
