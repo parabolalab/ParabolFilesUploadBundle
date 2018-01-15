@@ -10,9 +10,9 @@
                 <span class="help-block error files-error hidden"><ul class="list-unstyled"><li><span class="glyphicon glyphicon-exclamation-sign"></span> {{ form.vars.attr.error }}</li></ul></span>
                 {% endif %}
                 {% if form.vars.description == 'default' and form.vars.attr.multiple  %}
-                    <p><small class="help-block">{% trans %}Dodane zdjęcia można przeciągać aby zmienić ich kolejność lub ich przeznaczenie.{% endtrans %}</small></p>
+                    <p><span class="help help-block">{% trans %}Dodane zdjęcia można przeciągać aby zmienić ich kolejność lub ich przeznaczenie.{% endtrans %}</span></p>
                 {% elseif form.vars.description is not empty and form.vars.description != 'default' %}
-                    <p><small class="help-block">{{ form.vars.description | trans }}</small></p>
+                    <p><span class="help help-block">{{ form.vars.description | trans }}</span></p>
                 {% endif %}  
             </div>
         </div>
