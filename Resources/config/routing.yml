@@ -17,3 +17,4 @@ parabol_uploader_delete:
 #     path: /_uploader/update-position
 #     defaults:  { _controller: ParabolFilesUploadBundle:Blueimp:updatePosition }
 #     options: { i18n: false }
+

@@ -37,9 +37,9 @@ trait Files {
 
         }
 
-          // die();
+          
 
-        return parent::__call($property, $arguments);
+        return get_parent_class($this) ? parent::__call($property, $arguments) : null;
 
     }
 

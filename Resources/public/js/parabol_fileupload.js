@@ -60,7 +60,7 @@ $(document).ready(function () {
 			        previewMaxWidth: 100,
 			        previewMaxHeight: 100,
 			        previewCrop: true,
-			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}	        
+			        formData: {class: $input.data('class'), ref: $input.data('ref'), context: $input.data('context'), path: $input.data('path'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}	        
 		        })
 				.on('fileuploadfinished', function (e, data) {
 					if(!$('#' + id + '-files > li:last-child').hasClass('error'))

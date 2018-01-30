@@ -19,6 +19,8 @@ services:
             - "@liip_imagine.cache.manager"
 
     Parabol\FilesUploadBundle\Form\Base\Extension\AdminBaseTypeExtension:
-        arguments: [  ]
+        arguments: 
+            - "@=service('kernel').getBundles()"
+            - "@=service('kernel').getEnvironment()"
         tags:
             -  { name: parabol.admin_base_type_extension }

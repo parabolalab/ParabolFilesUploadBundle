@@ -121,9 +121,9 @@ class File extends BaseEntity
       */
     private $size;
 
-
+        //should be json_array in new version
      /**
-      * @ORM\Column(name="cropBoxData", type="json_array", nullable=true)
+      * @ORM\Column(name="cropBoxData", type="array", nullable=true)
       */
     private $cropBoxData;
 

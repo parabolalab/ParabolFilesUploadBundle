@@ -6,9 +6,22 @@ use Symfony\Component\Form\FormBuilderInterface;
 
 class AdminBaseTypeExtension  {
 
+    private $enabledBundles = [];
+    private $env;
+
+    public function __construct($enabledBundles, $env)
+    {
+        $this->enabledBundles = $enabledBundles;
+        $this->env = $env;
+    }
+
     public function configureOptions($formType, array &$options)
     {
-        $options['ckeditor']['filebrowserBrowseUrl'] = '/admin';
+     
+        if(isset($this->enabledBundles['ParabolFileAdminBundle']))
+        {
+            $options['ckeditor']['filebrowserBrowseUrl'] = ($this->env == 'dev' ? '/app_dev.php' : '') .  '/admin/files/browser';
+        }
         return $options;
     }
 
@@ -19,7 +32,7 @@ class AdminBaseTypeExtension  {
 
     public function postBuild($formType, array $options)
     {
-        if($formType->getDataClass())
+        if($formType->getDataClass() && method_exists($formType->getDataClass(), 'fileContexts'))
         {
             foreach ($formType->getDataClass()::fileContexts() as $key => $value) 
             {
