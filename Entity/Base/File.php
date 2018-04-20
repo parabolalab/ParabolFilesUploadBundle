@@ -11,7 +11,7 @@ trait File {
 
     public function getFile()
     {
-        return isset($this->files[0]) ? $this->files[0] : new \Parabol\FilesUploadBundle\Entity\File();
+        return isset($this->files[0]) ? $this->files[0] : null;
     }
 
     public static function fileContexts()
