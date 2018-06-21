@@ -46,7 +46,7 @@ class BlueimpType extends AbstractType
 
         $view->vars['description'] = $options['description'];
 
-        $view->vars['attr']['multiple'] = $options['class'] ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : true;
+        $view->vars['attr']['multiple'] = $options['class'] ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : $options['multiple'];
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];
         $view->vars['attr']['data']['order'] = $options['order'];
         $view->vars['class'] = $options['class'];
