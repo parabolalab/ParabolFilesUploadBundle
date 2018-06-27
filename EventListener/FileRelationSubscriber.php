@@ -314,8 +314,8 @@ class FileRelationSubscriber implements EventSubscriber
 
             $qb = $em->getRepository('ParabolFilesUploadBundle:File')
                   ->createQueryBuilder('f')
-                  ->andWhere('f.class = :class')
-                  ->where('f.ref = :ref')
+                  ->where('f.class = :class')
+                  ->andWhere('f.ref = :ref')
                   ->andWhere('f.isNew = :isNew')
                   ->setParameters([
                     'ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 
