@@ -10,7 +10,11 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 /**
  * Page
  *
- * @ORM\Table(name="parabol_file")
+ * @ORM\Table(name="parabol_file",
+ *    indexes={ 
+ *       @ORM\Index(name="search_idx", columns={"class", "ref", "initRef"})
+ *    }
+ * )
  * @ORM\Entity(repositoryClass="Parabol\FilesUploadBundle\Repository\FileRepository")
  */
 class File extends BaseEntity

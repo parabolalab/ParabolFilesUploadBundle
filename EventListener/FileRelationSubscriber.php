@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManager;
 class FileRelationSubscriber implements EventSubscriber
 {
 
-    private $container, $analizer, $files = [], $managed = false;
+    private $container, $analizer, $files = [], $ids = [], $managed = false;
 
     public function __construct($container, $analizer)
     {
@@ -177,7 +177,6 @@ class FileRelationSubscriber implements EventSubscriber
 
     public function postUpdate(LifecycleEventArgs $args)
     {
-
         $this->updateFilesOrder($args->getEntityManager(), $args->getEntity());
         
     }
@@ -313,12 +312,35 @@ class FileRelationSubscriber implements EventSubscriber
             $sessionId = $this->container->get('session')->getId();
             $class = get_class($entity);
 
-            $files = $em->getRepository('ParabolFilesUploadBundle:File')->findBy(array('ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 'class' => $class, 'isNew' => true));
+            $qb = $em->getRepository('ParabolFilesUploadBundle:File')
+                  ->createQueryBuilder('f')
+                  ->andWhere('f.class = :class')
+                  ->where('f.ref = :ref')
+                  ->andWhere('f.isNew = :isNew')
+                  ->setParameters([
+                    'ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 
+                    'class' => $class, 
+                    'isNew' => true,
+                  ])
+            ;
+
+            if(isset($this->ids[0]))
+            {
+              $qb
+                ->andWhere('f.id NOT IN (:ids)')
+                ->setParameter('ids', $this->ids)
+              ;
+            }
+
+            $files = $qb->getQuery()->getResult();
+            
 
             if(count($files))
             {
-                // foreach($entity->getFiles() as $f) var_dump($f);
-                foreach ($files as $file) {
+       
+                foreach ($files as $i => $file) {
+
+                    $this->ids[] = $file->getId();
 
                     $file
                         ->setPath($this->getNewPathAndMove($entity, $file))
@@ -328,6 +350,8 @@ class FileRelationSubscriber implements EventSubscriber
 
                     $entity->__addFile($file, $file->getContext());
                     $this->removeOldFileIfSingleFileInput($em, $file);
+
+                    unset($files[$i]);
 
                 }
                 
