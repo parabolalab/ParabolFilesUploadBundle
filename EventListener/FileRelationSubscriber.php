@@ -392,6 +392,7 @@ class FileRelationSubscriber implements EventSubscriber
             $newPath = $newDir . DIRECTORY_SEPARATOR . $filename;
 
             $webdir = $this->container->get('parabol.utils.path')->getWebDir();    
+
             if($fs->exists($webdir . $oldPath))
             {
                 $dir = $webdir . dirname($newPath);
@@ -403,14 +404,18 @@ class FileRelationSubscriber implements EventSubscriber
 
                 if($file->isImage())
                 { 
-                    $oldThumbPath = $this->container->get('parabol.utils.path')->trimHost(
+
+
+
+                    $oldThumbPath = $this->container->get('parabol.utils.path')->trimScriptName($this->container->get('parabol.utils.path')->trimHost(
                                             $this->container->get('liip_imagine.cache.manager')->resolve($oldPath, 'admin_thumb')
-                                    );
-                    $newThumbPath = $this->container->get('parabol.utils.path')->trimHost(
+                                    ));
+                    $newThumbPath = $this->container->get('parabol.utils.path')->trimScriptName($this->container->get('parabol.utils.path')->trimHost(
                                             $this->container->get('liip_imagine.cache.manager')->resolve($newPath, 'admin_thumb')
-                                    );
+                                    ));
 
                     if(!$fs->exists(dirname($webdir . $newThumbPath))) $fs->mkdir(dirname($webdir . $newThumbPath));
+
 
                     $fs->rename(
                         $webdir . $oldThumbPath, 
