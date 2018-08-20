@@ -42,17 +42,17 @@ class BlueimpFileHelper
 	}
 
 	public function getUniqueFilename($dir, $filename)
-	{
-		$i = 1;
-           
+  {
+        $i = 1;
+        $orgname = $filename;
         while(file_exists($dir . DIRECTORY_SEPARATOR . $filename))
         {
-            $filename = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $filename);
+            $filename = preg_replace('#(\.[a-z]+)$#', '-'.$i.'$1', $orgname);
             $i++;
         }
 
         return $filename;
-	}
+  }
 
 
 }
