@@ -22,13 +22,14 @@ class BlueimpController extends Controller
         $fileHelper = $this->get('parabol.helper.blueimp_file');
         $ref = $fileHelper->generateRef($request->getSession()->getId(), $class);
 
-        $path = trim($request->get('path') ? $request->get('path') : $context . '/' . $ref , '/');
-        $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path);
+        $basepath = trim($request->get('path') ? $request->get('path') : $context . '/' . $ref , '/');
+        $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $basepath);
         if(!file_exists($dir)) mkdir($dir, 0777, true);
 
         $uploadedfiles = (array)$request->files->get($context);
 
         $data = array();
+
 
         foreach($uploadedfiles as $uploadedfile)
         {
@@ -39,9 +40,9 @@ class BlueimpController extends Controller
 
             if($context !== 'cropper')
             {
-                
+                  
                 $filename = $fileHelper->getUniqueFilename($dir, $filename);
-                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $path, DIRECTORY_SEPARATOR) . $filename;
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $basepath, DIRECTORY_SEPARATOR) . $filename;
 
                 $file = (new File())
                         ->setPath($path)
@@ -51,10 +52,13 @@ class BlueimpController extends Controller
                         ->setRef( $ref )
                         ->setInitRef( $request->get('ref') );
 
+                // dump($uploadedfile, $file);
+
                 $errors = $this->validate($uploadedfile, $file, $request);
 
                 if($errors->has(0))
                 {
+
                     $data[] = [
                         'name' => $uploadedfile->getClientOriginalName(),
                         'error' => htmlspecialchars($errors->get(0)->getMessage())
@@ -91,7 +95,7 @@ class BlueimpController extends Controller
             else
             {
                 $uploadedfile->move($dir, $filename);
-                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $path, DIRECTORY_SEPARATOR) . $filename;
+                $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') .  $basepath, DIRECTORY_SEPARATOR) . $filename;
 
                 if($request->get('orginalFilePath') && $request->get('cropperBoxData') !== null)
                 {
@@ -117,15 +121,7 @@ class BlueimpController extends Controller
                 }
             }
            
-           
-
-                   
-            
-            
-
-            
         }
-        
         
         $response->setData(array('files' => $data));
         
@@ -135,7 +131,6 @@ class BlueimpController extends Controller
     private function validate(UploadedFile $uploadedfile, File $file, Request $request)
     {
         $acceptedMimeTypes = explode('|', $request->get('acceptedMimeTypes'));
-
         if($file->isImage())
         {
             list($width, $height) = getimagesize($uploadedfile->getPathname());
