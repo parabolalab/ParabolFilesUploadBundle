@@ -1,16 +1,22 @@
 
 {{ source(form.vars.uploadTemplate) | replace({
-                    '${context}': form.vars.name,
+                    '${context}': form.vars.id,
                     '${thumb.onclick}': (form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : ''),
                     '${cropper}': form.vars.cropper ? 'true' : 'false',
                     '${edditable}': form.vars.edditable ? 'true' : 'false',
+                    '${customButtons}': form.vars.customButtons ? form.vars.customButtons : '',
+                    '${append}': form.vars.append ? form.vars.append : '',
+                    '${prepend}': form.vars.prepend ? form.vars.prepend : '',
                 }) | raw
 }}
 
 {{ source(form.vars.downloadTemplate) | replace({
-                    '${context}': form.vars.name,
+                    '${context}': form.vars.id,
                     '${thumb.onclick}': (form.vars.thumb.onclick ? 'onclick=' ~ form.vars.thumb.onclick : ''),
                     '${cropper}': form.vars.cropper ? 'true' : 'false',
                     '${edditable}': form.vars.edditable ? 'true' : 'false',
+                    '${customButtons}': form.vars.customButtons ? form.vars.customButtons : '',
+                    '${append}': form.vars.append ? form.vars.append : '',
+                    '${prepend}': form.vars.prepend ? form.vars.prepend : '',
                 }) | raw
 }}

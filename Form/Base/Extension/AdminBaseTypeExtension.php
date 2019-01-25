@@ -44,6 +44,8 @@ class AdminBaseTypeExtension  {
 
             $formType->getBuilder()->add('filesUpdatedAt',  \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
             $formType->getBuilder()->add('filesOrder', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
+            $formType->getBuilder()->add('filesColor', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
+            $formType->getBuilder()->add('filesHash', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class);
         }
     }
 
@@ -63,7 +65,7 @@ class AdminBaseTypeExtension  {
 
         //if(!isset($fieldOptions['attr']['labels'])) $fieldOptions['attr']['labels'] = [];
         $fieldOptions['class'] = $class;
-        $fieldOptions['ref'] = $formType->getBuilder()->getData()->getId();
+        $fieldOptions['ref'] = $formType->getBuilder()->getData() ? $formType->getBuilder()->getData()->getId() : null;
 
 
 

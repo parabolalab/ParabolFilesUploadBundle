@@ -48,10 +48,13 @@ class FileRelationSubscriber implements EventSubscriber
     // public function prePersist(LifecycleEventArgs $args)
     // {
         
+        
     // }
 
     // public function preUpdate(LifecycleEventArgs $args)
     // {
+
+
     //     // $entity = $args->getEntity();
     //     // if($entity instanceof \Parabol\AdminCoreBundle\Entity\Page)
     //     // {
@@ -134,10 +137,19 @@ class FileRelationSubscriber implements EventSubscriber
             'nullable' => true
         ));
 
+        $metadata->mapField(array(
+              'fieldName' => 'filesHash',
+              'type' => 'string',
+              'length' => 64,
+              'nullable' => true
+        ));
+
         $contexts = array_keys($class::fileContexts());
 
         foreach($contexts as $context)
         {
+
+            
 
             $metadata->mapManyToMany(array(
                 'targetEntity'  => File::class,
@@ -172,11 +184,13 @@ class FileRelationSubscriber implements EventSubscriber
     {
 
         $this->manageFiles($args->getEntityManager(), $args->getEntity(), 'new');
+        $this->updateColors($args->getEntityManager(), $args->getEntity());
         $this->updateFilesOrder($args->getEntityManager(), $args->getEntity());
     }
 
     public function postUpdate(LifecycleEventArgs $args)
     {
+        $this->updateColors($args->getEntityManager(), $args->getEntity());
         $this->updateFilesOrder($args->getEntityManager(), $args->getEntity());
         
     }
@@ -188,6 +202,34 @@ class FileRelationSubscriber implements EventSubscriber
         return $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\Files::class) 
                 || $this->analizer->hasTrait($refClass, \Parabol\FilesUploadBundle\Entity\Base\File::class);
         
+    }
+
+    private function updateColors(EntityManager $em, $entity)
+    {
+        if( $this->hasFilesTrait($entity) )
+        {
+            foreach((array)$entity->getFilesColor() as $context => $colors)
+            {
+                if($colors)
+                {
+
+                    $q = ''; $params = [];
+                    
+                    foreach ($colors as $id => $color) {
+                       $q .= ",(?, ?)";
+                       $params[] = $id;                        
+                       $params[] = $color;
+                    }
+
+
+                    $stmt = $em->getConnection()
+                        ->prepare("INSERT IGNORE INTO parabol_file (id, color) VALUES " . trim($q, ',') . " ON DUPLICATE KEY UPDATE color=VALUES(color) ")
+                        ->execute($params);
+                } 
+            }
+
+        }
+           
     }
 
     private function updateFilesOrder(EntityManager $em, $entity)
@@ -318,11 +360,13 @@ class FileRelationSubscriber implements EventSubscriber
                   ->andWhere('f.ref = :ref')
                   ->andWhere('f.isNew = :isNew')
                   ->setParameters([
-                    'ref' => $this->container->get('parabol.helper.blueimp_file')->generateRef($sessionId, $class), 
+                    'ref' => $entity->getFilesHash(), 
                     'class' => $class, 
                     'isNew' => true,
                   ])
             ;
+
+            
 
             if(isset($this->ids[0]))
             {
@@ -334,7 +378,6 @@ class FileRelationSubscriber implements EventSubscriber
 
             $files = $qb->getQuery()->getResult();
             
-
             if(count($files))
             {
        

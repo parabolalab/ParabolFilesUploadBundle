@@ -1,9 +1,8 @@
 {% trans_default_domain "Admingenerator" %}
 
 {% block blueimp_upload_widget %}
-
 <div class="form-group">
-    <div id="{{ form.vars.name }}-fileupload" class="fileupload" data-url="{{ path('parabol_uploader') }}" >
+    <div id="{{ form.vars.id }}-fileupload" class="fileupload" data-url="{{ path('parabol_uploader') }}" >
         <div class="row">
             <div class="col-lg-12">
                 {% if form.vars.attr.error is defined %}
@@ -22,15 +21,17 @@
             <i class="glyphicon glyphicon-plus"></i>&nbsp; <span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
             <!-- The file input field used as target for the file upload widget -->
             <input 
-                id="{{ form.vars.name }}-fileuploadInput" 
+                id="{{ form.vars.id }}" 
                 class="fileupload-input" 
                 type="file" 
                 {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }}
                 name="{{ form.vars.name }}[]" 
                 data-context="{{ form.vars.name }}" 
                 data-type="{{ app.request.pathInfo|split('/')|last }}" 
+                data-hash="{{ form.parent.vars.value ? form.parent.vars.value.filesHash : '' }}"
                 {% for attrname, attrvalue in form.vars.attr if attrname not in ['data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
-                {% for attrname, attrvalue in form.vars.attr.data %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %}
+                {% for attrname, attrvalue in form.vars.attr.data if attrname not in ['ref'] %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %}
+                data-ref="{{ form.parent.vars.value ? form.parent.vars.value.id : '' }}"
                 data-url="{{ path('parabol_uploader') }}" 
                 data-acceptmimetypes="{{ form.vars.acceptMimeTypes | join('|') }}"
                 accept="{{ form.vars.acceptMimeTypes | join(',') }}" 
@@ -57,7 +58,7 @@
                     <span class="label hidden">{{ label }}</span>
                     {% endfor %}
                 {% endif %}
-                <ul id="{{ form.vars.name }}-fileupload-files" class="files"></ul>
+                <ul id="{{ form.vars.id }}-fileupload-files" class="files"></ul>
             </div>
         </div>
         

@@ -96,9 +96,9 @@ class File extends BaseEntity
     private $url;
 
     /**
-     * @ORM\Column(name="color", type="string", length=7, nullable=true)
+     * @ORM\Column(name="color", type="string", length=150, nullable=true)
      */
-    private $color = '#ffffff';  
+    private $color = null;  
 
     /**
      * @ORM\Column(name="cssClass", type="string", length=500, nullable=true)
@@ -370,31 +370,6 @@ class File extends BaseEntity
         return $this->isNew;
     }
 
-
-
-    /**
-     * Set hash
-     *
-     * @param string $hash
-     *
-     * @return File
-     */
-    public function setHash($hash)
-    {
-        $this->hash = $hash;
-
-        return $this;
-    }
-
-    /**
-     * Get hash
-     *
-     * @return string
-     */
-    public function getHash()
-    {
-        return $this->hash;
-    }
 
     /**
      * Set alt

@@ -33,6 +33,9 @@ class BlueimpType extends AbstractType
                     'onclick' => null,
                     'lables' => null
                 ],
+                'customButtons' => null,
+                'append' => null,
+                'prepend' => null,
                 'uploadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:upload-template.js.tmpl',
                 'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
         ));
@@ -52,6 +55,9 @@ class BlueimpType extends AbstractType
         $view->vars['class'] = $options['class'];
         $view->vars['edditable'] = $options['edditable'];
         $view->vars['cropper'] = $options['cropper'];
+        $view->vars['customButtons'] = $options['customButtons'];
+        $view->vars['append'] = $options['append'];
+        $view->vars['prepend'] = $options['prepend'];
 
 
         if($options['acceptMimeTypes'] && !is_array($options['acceptMimeTypes'])) throw new InvalidOptionsException('The options "acceptMimeTypes" must by an array.');

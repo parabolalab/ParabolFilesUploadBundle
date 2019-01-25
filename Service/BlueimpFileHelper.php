@@ -27,10 +27,12 @@ class BlueimpFileHelper
             "width" => $file->getWidth(),
             "height" => $file->getHeight(),
             "thumbnailUrl" => !$file->isImage() ? $file->getPathForThumb() : $this->liipCacheManager->getBrowserPath($file->getPathForThumb(), $thumbName),
+            "editUrl" => $this->router->generate('parabol_admin_core_dialog_form', [ 'id' => $file->getId(), 'entity' => \Parabol\FilesUploadBundle\Entity\File::class ]),
             "deleteUrl" => !$allowDeletePattern || preg_match('#' . $allowDeletePattern . '#', $file->getPath()) ? $this->router->generate('parabol_uploader_delete', [ 'id' => $file->getId() ]) : null,
             "deleteType" => "GET",
             "cropper" => $file->isImage(),
             "cropBoxData" => (array)$file->getCropBoxData(),
+            "color" => $file->getColor(),
 		];
 
 		return $result;

@@ -20,7 +20,9 @@ class BlueimpController extends Controller
         $class = $request->get('class');
         $context = $request->get('context');
         $fileHelper = $this->get('parabol.helper.blueimp_file');
-        $ref = $fileHelper->generateRef($request->getSession()->getId(), $class);
+        $ref = $request->get('hash');
+
+        //$fileHelper->generateRef($request->getSession()->getId(), $request->get('hash'));
 
         $basepath = trim($request->get('path') ? $request->get('path') : $context . '/' . $ref , '/');
         $dir = $this->get('parabol.utils.path')->getAbsoluteUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $basepath);
@@ -164,7 +166,8 @@ class BlueimpController extends Controller
         $result = array();
 
         $params = $request->query->get('params');
-        $params['hash'] = $this->get('parabol.helper.blueimp_file')->generateRef($this->get('session')->getId(), $params['class']);
+        // $params['hash'] = $params['ref'];
+        //$this->get('parabol.helper.blueimp_file')->generateRef($this->get('session')->getId(), $params['class']);
         $toRemove = $this->get('parabol.helper.blueimp_file')->generateRef($this->get('session')->getId(), $params['ref']);
 
         $em = $this->getDoctrine()->getManager();

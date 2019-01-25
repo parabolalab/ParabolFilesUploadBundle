@@ -6,9 +6,11 @@ namespace Parabol\FilesUploadBundle\Entity\Base;
 
 trait Files {
 
-	public $files;
+	  public $files;
     protected $filesUpdatedAt;
     protected $filesOrder;
+    protected $filesColor;
+    protected $filesHash;
 
     public function __call($property, $arguments)
     {
@@ -126,6 +128,28 @@ trait Files {
     public function setFilesOrder($value)
     {
         $this->filesOrder = json_decode($value, true);
+        return $this;
+    }
+
+    public function getFilesColor()
+    {
+        return $this->filesColor;
+    }
+
+    public function setFilesColor($value)
+    {
+        $this->filesColor = json_decode($value, true);
+        return $this;
+    }
+
+    public function getFilesHash()
+    {
+        return $this->filesHash;
+    }
+
+    public function setFilesHash($value)
+    {
+        $this->filesHash = $value;
         return $this;
     }
 }
