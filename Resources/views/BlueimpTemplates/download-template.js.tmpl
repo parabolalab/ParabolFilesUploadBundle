@@ -19,7 +19,7 @@
 
 
             	{% if (${edditable}) { %}
-                <button class="btn btn-default btn-light btn-xs edit" style="padding: 2px 6px 1px" onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\Parabol\FileAdminBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
+                <button class="btn btn-default btn-light btn-xs edit"  onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\App\FileAdminBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
                		<i class="ion ion-edit"></i>
                 </button>
                 {% } %} 
@@ -40,7 +40,7 @@
             	{% } %} 
 
                 {% if (file.deleteUrl) { %}
-                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+                <button class="btn btn-danger btn-light btn-xs delete" style="margin-left: 4px; margin-bottom: 0 !important; " data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
                     <i class="ion ion-trash-b"></i>
                 </button>
                 {% } %}    

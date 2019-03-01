@@ -86,7 +86,7 @@ class File extends BaseEntity
     private $headline;
 
     /**
-     * @ORM\Column(name="subheadline", type="string", length=255, nullable=true)
+     * @ORM\Column(name="subheadline", type="text", nullable=true)
      */
     private $subheadline;
 
