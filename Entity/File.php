@@ -727,6 +727,11 @@ class File extends BaseEntity
         return $this->toRemove;
     }
 
+    public function getBase64Path()
+    {
+        return base64_encode($this->getPath());
+    }
+
 
 
 }
