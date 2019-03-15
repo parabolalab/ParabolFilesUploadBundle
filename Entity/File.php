@@ -595,10 +595,6 @@ class File extends BaseEntity
         return $this->cssStyle;
     }
 
-    public function getSlug()
-    {
-        return $this->slug ? $this->slug : \Parabol\BaseBundle\Util\PathUtil::slugize(pathinfo($this->path)['filename']);
-    }
 
     /**
      * Set width
