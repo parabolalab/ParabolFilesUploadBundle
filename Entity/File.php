@@ -8,7 +8,7 @@ use A2lix\TranslationFormBundle\Util\Knp\KnpTranslatable;
 use Parabol\BaseBundle\Entity\Base\BaseEntity;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 /**
- * Page
+ * File
  *
  * @ORM\Table(name="parabol_file",
  *    indexes={ 
@@ -22,8 +22,7 @@ class File extends BaseEntity
 
     use 
         ORMBehaviors\Sortable\Sortable,
-        ORMBehaviors\Sluggable\Sluggable
-        // ORMBehaviors\Translatable\Translatable
+        ORMBehaviors\Translatable\Translatable
         ;
 
     /**
@@ -75,26 +74,6 @@ class File extends BaseEntity
      */
     private $isNew = true;
 
-     /**
-     * @ORM\Column(name="alt", type="string", length=255, nullable=true)
-     */
-    private $alt;
-
-     /**
-     * @ORM\Column(name="headline", type="string", length=255, nullable=true)
-     */
-    private $headline;
-
-    /**
-     * @ORM\Column(name="subheadline", type="text", nullable=true)
-     */
-    private $subheadline;
-
-    /**
-     * @ORM\Column(name="url", type="string", length=500, nullable=true)
-     */
-    private $url;
-
     /**
      * @ORM\Column(name="color", type="string", length=150, nullable=true)
      */
@@ -139,13 +118,7 @@ class File extends BaseEntity
 
 
     public function __construct() {
-        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
         return $this;
-    }
-
-    public function getSluggableFields()
-    {
-        return $this->headline ? [ 'headline' ] : [ 'path' ];
     }
     
     public function __toString()
@@ -370,79 +343,6 @@ class File extends BaseEntity
         return $this->isNew;
     }
 
-
-    /**
-     * Set alt
-     *
-     * @param string $alt
-     *
-     * @return File
-     */
-    public function setAlt($alt)
-    {
-        $this->alt = $alt;
-
-        return $this;
-    }
-
-    /**
-     * Get alt
-     *
-     * @return string
-     */
-    public function getAlt()
-    {
-        return $this->alt;
-    }
-
-    /**
-     * Set headline
-     *
-     * @param string $headline
-     *
-     * @return File
-     */
-    public function setHeadline($headline)
-    {
-        $this->headline = $headline;
-
-        return $this;
-    }
-
-    /**
-     * Get headline
-     *
-     * @return string
-     */
-    public function getHeadline()
-    {
-        return $this->headline;
-    }
-
-    /**
-     * Set subheadline
-     *
-     * @param string $subheadline
-     *
-     * @return File
-     */
-    public function setSubheadline($subheadline)
-    {
-        $this->subheadline = $subheadline;
-
-        return $this;
-    }
-
-    /**
-     * Get subheadline
-     *
-     * @return string
-     */
-    public function getSubheadline()
-    {
-        return $this->subheadline;
-    }
-
     /**
      * Set color
      *
@@ -532,31 +432,6 @@ class File extends BaseEntity
             }
         }
     }
-
-    /**
-     * Set url
-     *
-     * @param string $url
-     *
-     * @return File
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
-
-        return $this;
-    }
-
-    /**
-     * Get url
-     *
-     * @return string
-     */
-    public function getUrl()
-    {
-        return $this->url;
-    }
-
 
     /**
      * Set cssClass
@@ -725,11 +600,6 @@ class File extends BaseEntity
     public function getToRemove()
     {
         return $this->toRemove;
-    }
-
-    public function getBase64Path()
-    {
-        return base64_encode($this->getPath());
     }
 
 
