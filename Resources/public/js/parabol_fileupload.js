@@ -95,14 +95,14 @@ function initFileUpload(items)
         
         var acceptmimetypes = new RegExp('(\.|\/)(' + $input.data('acceptmimetypes') + ')$', 'i')
         
-        if($input.data('ref') == '')
-        { 
+        // if($input.data('ref') == '')
+        // { 
             var hash = parabol_fileupload_hash + hashCode($input.attr('id'))
 
             // Math.random().toString(16).substr(2) + Math.random().toString(16).substr(2);
             $input.data('hash', hash)
             $('#'+$input.attr('id')+'Hash').val(hash)
-        }
+        // }
 
         $(this).fileupload({
               dataType: 'json',

@@ -74,6 +74,26 @@ class File extends BaseEntity
      */
     private $isNew = true;
 
+     /**
+     * @ORM\Column(name="alt", type="string", length=255, nullable=true)
+     */
+    private $alt;
+
+     /**
+     * @ORM\Column(name="headline", type="string", length=255, nullable=true)
+     */
+    private $headline;
+
+    /**
+     * @ORM\Column(name="subheadline", type="text", nullable=true)
+     */
+    private $subheadline;
+
+    /**
+     * @ORM\Column(name="url", type="string", length=500, nullable=true)
+     */
+    private $url;
+
     /**
      * @ORM\Column(name="color", type="string", length=150, nullable=true)
      */
@@ -341,6 +361,102 @@ class File extends BaseEntity
     public function isNew()
     {
         return $this->isNew;
+    }
+
+    /**
+     * Set alt
+     *
+     * @param string $alt
+     *
+     * @return File
+     */
+    public function setAlt($alt)
+    {
+        $this->alt = $alt;
+
+        return $this;
+    }
+
+    /**
+     * Get alt
+     *
+     * @return string
+     */
+    public function getAlt()
+    {
+        return $this->alt;
+    }
+
+    /**
+     * Set headline
+     *
+     * @param string $headline
+     *
+     * @return File
+     */
+    public function setHeadline($headline)
+    {
+        $this->headline = $headline;
+
+        return $this;
+    }
+
+    /**
+     * Get headline
+     *
+     * @return string
+     */
+    public function getHeadline()
+    {
+        return $this->headline;
+    }
+
+    /**
+     * Set subheadline
+     *
+     * @param string $subheadline
+     *
+     * @return File
+     */
+    public function setSubheadline($subheadline)
+    {
+        $this->subheadline = $subheadline;
+
+        return $this;
+    }
+
+    /**
+     * Get subheadline
+     *
+     * @return string
+     */
+    public function getSubheadline()
+    {
+        return $this->subheadline;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     *
+     * @return File
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     /**
