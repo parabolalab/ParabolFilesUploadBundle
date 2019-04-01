@@ -7,8 +7,6 @@ trait File {
     use Files
     ;
 
-    private static $allowMultipleFiles = false;
-
     public function getFile()
     {
         return isset($this->files[0]) ? $this->files[0] : null;

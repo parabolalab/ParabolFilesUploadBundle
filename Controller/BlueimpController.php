@@ -50,6 +50,8 @@ class BlueimpController extends Controller
                         ->setPath($path)
                         ->setContext($context)
                         ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType())
+                        ->setSize($uploadedfile->getSize())
+                        ->setName($uploadedfile->getClientOriginalName())
                         ->setClass($class ? $class : null)
                         ->setRef( $ref )
                         ->setInitRef( $request->get('ref') );

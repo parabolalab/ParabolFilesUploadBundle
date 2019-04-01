@@ -80,6 +80,11 @@ class File extends BaseEntity
     private $alt;
 
      /**
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     */
+    private $name;
+
+     /**
      * @ORM\Column(name="headline", type="string", length=255, nullable=true)
      */
     private $headline;
@@ -385,6 +390,30 @@ class File extends BaseEntity
     public function getAlt()
     {
         return $this->alt;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return File
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
