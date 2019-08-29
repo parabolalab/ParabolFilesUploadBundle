@@ -95,18 +95,13 @@ function initFileUpload(items)
         
         var acceptmimetypes = new RegExp('(\.|\/)(' + $input.data('acceptmimetypes') + ')$', 'i')
         
-        
-        if($('#'+keyIndex+'_filesHash').val() == '')
+        if($input.data('hash') == '')
         { 
             var hash = parabol_fileupload_hash + hashCode($input.attr('id'))
 
+            // Math.random().toString(16).substr(2) + Math.random().toString(16).substr(2);
             $input.data('hash', hash)
-            $('#'+keyIndex+'_filesHash').val(hash)
-        }
-        else
-        {
-          $input.data('hash', $('#'+keyIndex+'_filesHash').val())
-          
+            $('#'+$input.attr('id')+'Hash').val(hash)
         }
 
         $(this).fileupload({
