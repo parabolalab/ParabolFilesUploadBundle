@@ -25,3 +25,8 @@ services:
             - "@=service('kernel').getEnvironment()"
         tags:
             -  { name: parabol.admin_base_type_extension }
+
+    app.bluimp.extension:
+        class: Parabol\FilesUploadBundle\Form\Base\Extension\SonataAdminBluimpTypeExtension  
+        tags:
+            - { name: sonata.admin.extension, global: true }

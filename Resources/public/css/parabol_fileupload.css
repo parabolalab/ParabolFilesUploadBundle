@@ -1,0 +1,87 @@
+.clear-left {
+  clear: left !important;
+}
+
+.clear-right {
+  clear: right !important;
+}
+
+.clear-both {
+  clear: both !important;
+}
+
+.fileinput-button {
+    position: relative;
+    overflow: hidden;
+}
+.fileinput-button input {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 0px;
+  opacity: 0;
+  font-size: 200px;
+  direction: ltr;
+  cursor: pointer;
+}
+
+.template-download, .template-upload {
+  padding: 0; width: 100px; height: 100px; margin: 10px 10px 10px 0
+}
+
+
+
+ul.files {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sort li {
+  height: 80px; width: 80px; background: red; float: left;
+}
+
+.sort .dragged, ul.files li.dragged {
+  /*display: none;*/
+}
+
+ul.files span.preview {
+  background: no-repeat center center / cover;
+  width: 98px;
+  height: 98px;
+  display: block;
+}
+
+ul.files li.btn { overflow: visible !important; }
+
+ul.files li small.sizes {
+  position: absolute;
+z-index: 1222121;
+bottom: 0px;
+left: 0;
+width: 100%;
+color: #fff;
+background: rgba(0,0,0,0.8);
+display: none;
+font-size: 75%;
+}
+
+ul.files li:hover small.sizes {
+  display: block;
+}
+
+ul.files .placeholder {
+    height: 100px; width: 100px;
+}
+
+ul.files .delete {
+  font-size: 100%;
+  padding: 0 7px;
+}
+
+
+.dragged {
+  position: absolute;
+  z-index: 2000;
+  margin-top: -10px;
+  margin-left: -10px;
+}

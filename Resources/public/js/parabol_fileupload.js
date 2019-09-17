@@ -1,5 +1,8 @@
 var parabol_fileupload_sortableNewValues = {};
 var parabol_fileupload_hash = null;
+
+if(typeof sf_env === 'undefined' ) var sf_env = '';
+
 function hashCode(value) {
 
   var hash = 0, i, chr;
