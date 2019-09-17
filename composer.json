@@ -2,6 +2,8 @@
     "name": "parabol/parabol-files-upload-bundle",
     "version": "master",
     "type": "symfony-bundle",
+    "license": "MIT",
+    "description": "Symfony Files Upload Extension",
     "require" : {
         "php": ">=5.6.0",
         "parabol/parabol-base-bundle": "dev-master",
