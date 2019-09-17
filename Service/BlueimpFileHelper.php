@@ -18,6 +18,15 @@ class BlueimpFileHelper
 
 	public function toArray(\Parabol\FilesUploadBundle\Entity\File $file, $allowDeletePattern = null, $thumbName = 'admin_thumb')
 	{
+
+    try {
+        $editUrl = $this->router->generate('parabol_admin_core_dialog_form', [ 'id' => $file->getId(), 'entity' => \Parabol\FilesUploadBundle\Entity\File::class ]);
+    }
+    catch(\Exception $e)
+    {
+        $editUrl = null;
+    }
+
 		$result = [
 			"name" => basename($file->getPath()),
 			"url" => $file->getPath(), //$path ? $path : preg_replace('#^.*\/.\.\/[\w_]+#', '', $obj->getPathname());
@@ -27,7 +36,7 @@ class BlueimpFileHelper
             "width" => $file->getWidth(),
             "height" => $file->getHeight(),
             "thumbnailUrl" => !$file->isImage() ? $file->getPathForThumb() : $this->liipCacheManager->getBrowserPath($file->getPathForThumb(), $thumbName),
-            "editUrl" => $this->router->generate('parabol_admin_core_dialog_form', [ 'id' => $file->getId(), 'entity' => \Parabol\FilesUploadBundle\Entity\File::class ]),
+            "editUrl" => $editUrl,
             "deleteUrl" => !$allowDeletePattern || preg_match('#' . $allowDeletePattern . '#', $file->getPath()) ? $this->router->generate('parabol_uploader_delete', [ 'id' => $file->getId() ]) : null,
             "deleteType" => "GET",
             "cropper" => $file->isImage(),

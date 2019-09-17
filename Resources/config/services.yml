@@ -14,6 +14,7 @@ services:
 
     parabol.helper.blueimp_file:
         class: Parabol\FilesUploadBundle\Service\BlueimpFileHelper
+        public: true
         arguments:
             - "@router"
             - "@liip_imagine.cache.manager"
