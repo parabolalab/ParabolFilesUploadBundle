@@ -14,6 +14,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Parabol\FilesUploadBundle\Entity\File;
 use Symfony\Component\Filesystem\Filesystem;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Inflector\Inflector;
 
 class FileRelationSubscriber implements EventSubscriber
 {
@@ -144,16 +145,18 @@ class FileRelationSubscriber implements EventSubscriber
               'nullable' => true
         ));
 
+
+
         $contexts = array_keys($class::fileContexts());
 
         foreach($contexts as $context)
         {
-
+            preg_match('/[^\\\]+$/',$class, $match);
             
-
             $metadata->mapManyToMany(array(
                 'targetEntity'  => File::class,
                 'fieldName'     => $context,
+                'mappedBy'    => Inflector::camelize($match[0]),
                 'cascade'       => array('persist', 'remove'),
                 'orderBy'       => array('sort' => 'DESC'),
                 'joinTable'     => array(
@@ -177,6 +180,15 @@ class FileRelationSubscriber implements EventSubscriber
                 )
             ));
         }
+
+
+        //additional field map for a2lix 3.x
+
+        $metadata->mapField(array(
+              'fieldName' => 'filesOrder',
+              'type' => 'text',
+              'nullable' => true
+        ));
     }
 
 

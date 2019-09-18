@@ -38,6 +38,7 @@ class BlueimpType extends AbstractType
                 'prepend' => null,
                 'uploadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:upload-template.js.tmpl',
                 'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
+                "allow_add" => null, "entry_options" => null, "entry_type" => null,
         ));
     }
 
