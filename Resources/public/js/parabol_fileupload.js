@@ -29,7 +29,7 @@ $(document).ready(function () {
     }
 
     
-    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype').length)
+    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype, .sonata-ba-field > div[data-prototype]').length)
     {
         document.addEventListener('collection_add', function (e) { 
             initFileUpload($(e.target).find('.fileupload'));
@@ -39,9 +39,9 @@ $(document).ready(function () {
     initFileUpload($('.fileupload'))
 
 
-    if($('.form-model > form').length)
+    if($('.form-model > form, .sonata-ba-form > form').length)
     {
-      $('.form-model > form').submit(function(){
+      $('.form-model > form, .sonata-ba-form > form').submit(function(){
           for(var i in parabol_fileupload_sortableNewValues)
           {
             $('#' + i).val(JSON.stringify(parabol_fileupload_sortableNewValues[i]).replace(/\-fileupload/g, ''))
