@@ -156,7 +156,7 @@ class FileRelationSubscriber implements EventSubscriber
             $metadata->mapManyToMany(array(
                 'targetEntity'  => File::class,
                 'fieldName'     => $context,
-                'mappedBy'    => Inflector::camelize($match[0]),
+                // 'mappedBy'    => Inflector::camelize($match[0]),
                 'cascade'       => array('persist', 'remove'),
                 'orderBy'       => array('sort' => 'DESC'),
                 'joinTable'     => array(
