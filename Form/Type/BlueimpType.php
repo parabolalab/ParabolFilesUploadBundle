@@ -40,6 +40,8 @@ class BlueimpType extends AbstractType
                 'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
                 "allow_add" => null, "entry_options" => null, "entry_type" => null,
         ));
+
+         $resolver->setAllowedTypes('class', 'string');
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

@@ -184,11 +184,11 @@ class FileRelationSubscriber implements EventSubscriber
 
         //additional field map for a2lix 3.x
 
-        // $metadata->mapField(array(
-        //       'fieldName' => 'filesOrder',
-        //       'type' => 'text',
-        //       'nullable' => true
-        // ));
+        $metadata->mapField(array(
+              'fieldName' => 'filesOrder',
+              'type' => 'text',
+              'nullable' => true
+        ));
     }
 
 
@@ -378,8 +378,6 @@ class FileRelationSubscriber implements EventSubscriber
                   ])
             ;
 
-            
-
             if(isset($this->ids[0]))
             {
               $qb
@@ -434,6 +432,7 @@ class FileRelationSubscriber implements EventSubscriber
 
 
         }
+
     }
 
     private function getNewPathAndMove($entity, File $file)

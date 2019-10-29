@@ -16,6 +16,7 @@ final class SonataAdminBluimpTypeExtension extends AbstractAdminExtension
 
         $dataClass = $formMapper->getFormBuilder()->getDataClass();
 
+        $group = null;
 
         if($dataClass && method_exists($dataClass, 'fileContexts'))
         {
@@ -23,8 +24,15 @@ final class SonataAdminBluimpTypeExtension extends AbstractAdminExtension
             {
                 if($formMapper->has($key))
                 {
-                    $formMapper->add($key, \Parabol\FilesUploadBundle\Form\Type\BlueimpType::class, $this->resolveOptions($dataClass, $formMapper->getFormBuilder()->getData(), $formMapper->get($key)->getOptions()));
+                    $group = $formMapper->getFieldGroup($key);
+                    if($group) $formMapper->with($group);
 
+                    $formMapper->add($key, \Parabol\FilesUploadBundle\Form\Type\BlueimpType::class, $this->resolveOptions($dataClass, $formMapper->getFormBuilder()->getData(), $formMapper->get($key)->getOptions()));
+                    
+                    if($group) $formMapper->end();
+
+
+                    
                     $formMapper->get($key)->addModelTransformer(new CallbackTransformer (
                         function ($tagsAsArray) use ($key) {
                             // dump([1, $key, $tagsAsArray]);
@@ -39,13 +47,19 @@ final class SonataAdminBluimpTypeExtension extends AbstractAdminExtension
                             return new ArrayCollection();
                         }
                     ));
+
+                    
                 }
             }
+
+            if($group) $formMapper->with($group);
 
             $formMapper->add('filesUpdatedAt',  HiddenType::class);
             $formMapper->add('filesOrder', HiddenType::class);
             $formMapper->add('filesColor', HiddenType::class);
             $formMapper->add('filesHash', HiddenType::class);
+
+            if($group) $formMapper->end();
 
         }
         
