@@ -11,9 +11,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 final class SonataAdminBluimpTypeExtension extends AbstractAdminExtension
 {
     public function configureFormFields(FormMapper $formMapper)
+    {        
+        $this->configureFiles($formMapper);
+    }
+
+    public function configureFiles($formMapper)
     {
-
-
+        
         $dataClass = $formMapper->getFormBuilder()->getDataClass();
 
         $group = null;
@@ -24,7 +28,8 @@ final class SonataAdminBluimpTypeExtension extends AbstractAdminExtension
             {
                 if($formMapper->has($key))
                 {
-                    $group = $formMapper->getFieldGroup($key);
+                    $group = method_exists($formMapper, 'getFieldGroup') ? $formMapper->getFieldGroup($key) : null;
+
                     if($group) $formMapper->with($group);
 
                     $formMapper->add($key, \Parabol\FilesUploadBundle\Form\Type\BlueimpType::class, $this->resolveOptions($dataClass, $formMapper->getFormBuilder()->getData(), $formMapper->get($key)->getOptions()));
