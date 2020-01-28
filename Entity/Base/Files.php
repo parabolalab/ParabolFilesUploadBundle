@@ -6,7 +6,7 @@ namespace Parabol\FilesUploadBundle\Entity\Base;
 
 trait Files {
 
-	  public $files;
+	public $files;
     protected $filesUpdatedAt;
     protected $filesOrder;
     protected $filesColor;
@@ -22,24 +22,18 @@ trait Files {
         if(method_exists($this, 'fileContexts') && in_array($context, $this->getFilesContexts()))
         {
 
- 
+            $action = substr($property, 0, strlen($property) - strlen($context));
+            $method = '__' . ($action ? $action : 'get') . 'File';
 
-                $action = substr($property, 0, strlen($property) - strlen($context));
-                $method = '__' . ($action ? $action : 'get') . 'File';
+            if($this->isMultipleFilesAllowed($context) && in_array($property[0], ['g', 's'])) $method .= 's';
 
-                if($this->isMultipleFilesAllowed($context) && in_array($property[0], ['g', 's'])) $method .= 's';
-
-                // var_dump($method);
-
-                if(method_exists($this, $method))
-                {
-                   $arguments[] = $context; 
-                   return call_user_func_array([$this, $method], $arguments);
-                } 
+            if(method_exists($this, $method))
+            {
+               $arguments[] = $context; 
+               return call_user_func_array([$this, $method], $arguments);
+            }
 
         }
-
-          
 
         return get_parent_class($this) ? parent::__call($property, $arguments) : null;
 

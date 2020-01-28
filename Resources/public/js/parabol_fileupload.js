@@ -29,7 +29,7 @@ $(document).ready(function () {
     }
 
     
-    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype').length)
+    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype, .custom-collection').length)
     {
         document.addEventListener('collection_add', function (e) { 
             initFileUpload($(e.target).find('.fileupload'));
@@ -102,12 +102,13 @@ function initFileUpload(items)
         if($('#'+keyIndex+'_filesHash').val() == '')
         { 
             var hash = parabol_fileupload_hash + hashCode($input.attr('id'))
-
+            console.log('newhash', keyIndex, hash)
             $input.data('hash', hash)
             $('#'+keyIndex+'_filesHash').val(hash)
         }
         else
         {
+          console.log('hash', keyIndex, $('#'+keyIndex+'_filesHash').val())
           $input.data('hash', $('#'+keyIndex+'_filesHash').val())
           
         }
