@@ -12,6 +12,7 @@
 
             {% if (file.thumbnailUrl) { %}<span class="preview" style="background-image: url({%=file.thumbnailUrl%});"></span>{% } %}
             {% if (file.width) { %}<small class="sizes">{%=file.width%}px x {%=file.height%}px</small>{% } %}
+            {% if (${withName} && file.name) { %}<small title="{%=file.name%}" class="name text-center" style="font-size: 10px; max-width: 100%; overflow: hidden; display: inline-block; margin-top: 5px; white; white-space: nowrap;">{%=file.name%}</small>{% } %}
         	{% if (file.error) { %}<div><span class="label label-danger" style="position: absolute;left: 0;top: 79px;">Error</span></div>{% } %}
             <div style="position: absolute; top: 5px; right: 5px;">
             {% if (file.thumbnailUrl) { %}
