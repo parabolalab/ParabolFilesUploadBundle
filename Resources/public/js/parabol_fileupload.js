@@ -29,12 +29,15 @@ $(document).ready(function () {
     }
 
     
-    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype, .custom-collection').length)
+    
+    if($('.form-model-type-symfonycomponentformextensioncoretypecollectiontype').length)
     {
         document.addEventListener('collection_add', function (e) { 
             initFileUpload($(e.target).find('.fileupload'));
         }, true);
     }
+
+
     
     initFileUpload($('.fileupload'))
 
