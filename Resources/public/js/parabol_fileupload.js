@@ -42,9 +42,9 @@ $(document).ready(function () {
     initFileUpload($('.fileupload'))
 
 
-    if($('.form-model > form').length)
+    if($('.form-model > form, .sonata-ba-form > form').length)
     {
-      $('.form-model > form').submit(function(){
+      $('.form-model > form, .sonata-ba-form > form').submit(function(){
           for(var i in parabol_fileupload_sortableNewValues)
           {
             $('#' + i).val(JSON.stringify(parabol_fileupload_sortableNewValues[i]).replace(/\-fileupload/g, ''))
@@ -67,12 +67,15 @@ function initFileUpload(items)
         var max = $obj.children().length;
         
         parabol_fileupload_sortableNewValues[key][id] = { length: 0, values: {} }
-        
+
         $obj.children().each(function(index){
           parabol_fileupload_sortableNewValues[key][id].values[$(this).attr('data-id')] = max - index; 
           $(this).attr('data-sort', max - index)
           parabol_fileupload_sortableNewValues[key][id].length++;
         })
+
+        $('#' + key).val(parabol_fileupload_sortableNewValues);
+
       }
 
       function updateFilesUpdatedAt(prefix)
@@ -105,13 +108,11 @@ function initFileUpload(items)
         if($('#'+keyIndex+'_filesHash').val() == '')
         { 
             var hash = parabol_fileupload_hash + hashCode($input.attr('id'))
-            console.log('newhash', keyIndex, hash)
             $input.data('hash', hash)
             $('#'+keyIndex+'_filesHash').val(hash)
         }
         else
         {
-          console.log('hash', keyIndex, $('#'+keyIndex+'_filesHash').val())
           $input.data('hash', $('#'+keyIndex+'_filesHash').val())
           
         }
@@ -152,7 +153,8 @@ function initFileUpload(items)
           renewSortableValues(keyIndex + '_filesOrder', id, $('ul#' + id + '-files'))
         })
         ;
-          
+
+
 
         if($input.data('class'))
         {
@@ -182,25 +184,35 @@ function initFileUpload(items)
                   var event = new Event('fileuploadrendered');
                   $input[0].dispatchEvent(event);
 
-                    $('#' + id + ' ul.files').sortable({
-                      placeholder: '<li class="placeholder template-download btn btn-default"></li>',
-                      onDrop: function ($item, container, _super, event) {
-                  $item.removeClass("dragged").removeAttr("style")
-                  $("body").removeClass("dragging")
-                  renewSortableValues(keyIndex + '_filesOrder', id, $(container.el))
-                  updateFilesUpdatedAt(keyIndex)
+                  var sortableOptions = {
+                    placeholder: '<li class="placeholder template-download btn btn-default"></li>'
+                  }
 
+                  if($.fn.sortable( "option", "cursor") !== 'undefined')
+                  {
+                    //new version with jquery-ui sortable
+                    sortableOptions['update'] =  function(event, ui) {
 
+                        var $item = $(event.toElement.closest('tr'))
+                        $item.removeClass("dragged").removeAttr("style")
+                        $("body").removeClass("dragging")
+                        renewSortableValues(keyIndex + '_filesOrder', id, $(this))
+                        updateFilesUpdatedAt(keyIndex)
+                    }
+                  }
+                  else {
 
-                        // $.post(sf_env+'/_uploader/update-position', $item.data(), function(jdata){
-                        //    if(jdata.result != 'success')
-                        //    {
-                        //      alert('error');
-                        //    }
-                        // });
+                    //old version with jquery-sortable
+                    sortableOptions['onDrop'] = function ($item, container, _super, event) {
+                      $item.removeClass("dragged").removeAttr("style")
+                      $("body").removeClass("dragging")
+                      renewSortableValues(keyIndex + '_filesOrder', id, $(container.el))
+                      updateFilesUpdatedAt(keyIndex)
 
-                }
-                    })
+                    }
+                  }
+
+                    $('#' + id + ' ul.files').sortable(sortableOptions)
               });
           }
         })

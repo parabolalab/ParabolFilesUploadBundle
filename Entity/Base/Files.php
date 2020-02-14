@@ -9,7 +9,9 @@ trait Files {
 	public $files;
     protected $filesUpdatedAt;
     protected $filesOrder;
-    protected $filesColor;
+    protected $filesOrderHelper;
+    protected $filesColorHelper;
+    protected $filesColorHelperHelper;
     protected $filesHash;
 
     public function __call($property, $arguments)
@@ -116,23 +118,23 @@ trait Files {
 
     public function getFilesOrder()
     {
-        return $this->filesOrder;
+        return $this->filesOrderHelper;
     }
 
     public function setFilesOrder($value)
     {
-        $this->filesOrder = json_decode($value, true);
+        $this->filesOrderHelper = json_decode($value, true);
         return $this;
     }
 
     public function getFilesColor()
     {
-        return $this->filesColor;
+        return $this->filesColorHelper;
     }
 
     public function setFilesColor($value)
     {
-        $this->filesColor = json_decode($value, true);
+        $this->filesColorHelper = json_decode($value, true);
         return $this;
     }
 
