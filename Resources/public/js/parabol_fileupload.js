@@ -193,7 +193,7 @@ function initFileUpload(items)
                     //new version with jquery-ui sortable
                     sortableOptions['update'] =  function(event, ui) {
 
-                        var $item = $(event.toElement.closest('tr'))
+                        var $item = $(event.target.closest('tr'))
                         $item.removeClass("dragged").removeAttr("style")
                         $("body").removeClass("dragging")
                         renewSortableValues(keyIndex + '_filesOrder', id, $(this))
