@@ -158,7 +158,7 @@ class FileRelationSubscriber implements EventSubscriber
                 'fieldName'     => $context,
                 // 'mappedBy'    => Inflector::camelize($match[0]),
                 'cascade'       => array('persist', 'remove'),
-                'orderBy'       => array('sort' => 'DESC'),
+                'orderBy'       => array('sort' => $this->container->getParameter('parabol_files_upload.order')),
                 'joinTable'     => array(
                     'name'        => 'parabol_' . strtolower($namingStrategy->classToTableName($metadata->getName())) . '_'.$context,
                     'joinColumns' => array(

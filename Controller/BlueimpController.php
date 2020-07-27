@@ -42,7 +42,6 @@ class BlueimpController extends Controller
 
             if($context !== 'cropper')
             {
-                  
                 $filename = $fileHelper->getUniqueFilename($dir, $filename);
                 $path = $this->get('parabol.utils.path')->getUploadDir(($class ? $class . DIRECTORY_SEPARATOR : '') . $basepath, DIRECTORY_SEPARATOR) . $filename;
 
@@ -200,8 +199,8 @@ class BlueimpController extends Controller
                 ->where('f.class = :class')
                 ->andWhere('f.context = :context')
                 ->andWhere('f.ref = :ref OR f.ref = :hash')
-                ->orderBy('f.sort', 'DESC')
-                ->addOrderBy('f.id', 'DESC')
+                ->orderBy('f.sort', $this->container->getParameter('parabol_files_upload.order'))
+                ->addOrderBy('f.id', 'ASC')
                 
         ;
 

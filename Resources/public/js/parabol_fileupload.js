@@ -64,13 +64,12 @@ function initFileUpload(items)
 
       function renewSortableValues(key, id, $obj)
       {
-        var max = $obj.children().length;
-        
         parabol_fileupload_sortableNewValues[key][id] = { length: 0, values: {} }
 
         $obj.children().each(function(index){
-          parabol_fileupload_sortableNewValues[key][id].values[$(this).attr('data-id')] = max - index; 
-          $(this).attr('data-sort', max - index)
+
+          parabol_fileupload_sortableNewValues[key][id].values[$(this).attr('data-id')] = index + 1; 
+          $(this).attr('data-sort', index + 1)
           parabol_fileupload_sortableNewValues[key][id].length++;
         })
 
