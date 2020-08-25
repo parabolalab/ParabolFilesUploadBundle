@@ -158,9 +158,13 @@ function initFileUpload(items)
         if($input.data('class'))
         {
           
+          var params = {params: {class: $input.data('class'), ref: $input.data('ref'),  hash: $input.data('hash') , context: $input.data('context') }, type: $input.data('type') }
+
+          if($input.data('page')) params.page = $input.data('page');
+
           $.getJSON(
             sf_env+'/admin/_uploader/get', 
-            {params: {class: $input.data('class'), ref: $input.data('ref'),  hash: $input.data('hash') , context: $input.data('context') }, type: $input.data('type') },
+            params,
             function (files) {
 
               $('#' + id + ' .file-list .label').addClass('hidden');
@@ -212,6 +216,8 @@ function initFileUpload(items)
                   }
 
                     $('#' + id + ' ul.files').sortable(sortableOptions)
+
+                    $('#' + id + ' [role=append]').html(files.append)
               });
           }
         })

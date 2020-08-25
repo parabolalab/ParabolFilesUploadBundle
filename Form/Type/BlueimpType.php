@@ -39,7 +39,10 @@ class BlueimpType extends AbstractType
                 'withName' => false,
                 'uploadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:upload-template.js.tmpl',
                 'downloadTemplate' => 'ParabolFilesUploadBundle:BlueimpTemplates:download-template.js.tmpl',
-                "allow_add" => null, "entry_options" => null, "entry_type" => null,
+                "allow_add" => null, 
+                "entry_options" => null, 
+                "entry_type" => null,
+                "page" => null
         ));
 
          $resolver->setAllowedTypes('class', 'string');
@@ -52,7 +55,8 @@ class BlueimpType extends AbstractType
 
         $view->vars['description'] = $options['description'];
 
-        $view->vars['attr']['multiple'] = $options['class'] ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : $options['multiple'];
+        $view->vars['attr']['multiple'] = $options['class'] && method_exists($options['class'], 'isMultipleFilesAllowed') ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : $options['multiple'];
+
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];
         $view->vars['attr']['data']['order'] = $options['order'];
         $view->vars['class'] = $options['class'];
@@ -62,6 +66,8 @@ class BlueimpType extends AbstractType
         $view->vars['append'] = $options['append'];
         $view->vars['prepend'] = $options['prepend'];
         $view->vars['withName'] = $options['withName'];
+
+        if($options['page'] !== null) $view->vars['attr']['data']['page'] = $options['page'];
 
 
         if($options['acceptMimeTypes'] && !is_array($options['acceptMimeTypes'])) throw new InvalidOptionsException('The options "acceptMimeTypes" must by an array.');

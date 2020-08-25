@@ -743,6 +743,9 @@ class File extends BaseEntity
         return $this->toRemove;
     }
 
-
+    public static function isMultipleFilesAllowed()
+    {
+        return true;
+    }
 
 }

@@ -211,9 +211,19 @@ class BlueimpController extends Controller
                 ->andWhere('f.toRemove IS NULL or f.toRemove != :toRemove')
             ;
         }
-        
-        $files = $qb->setParameters($params)->getQuery()->execute();
 
+        $qb->setParameters($params);
+
+        if($request->get('page'))
+        {
+            $files = new \App\_Aliso\Base\Tools\Paginator($qb->getQuery(), $request->get('page', 1));  
+            $result['append'] = $this->get('templating')->render('@Base/_pagination.html.twig', ['paginator' => $files]);
+        }
+        else 
+        {
+            $files = $qb->getQuery()->execute();
+        }
+        
         foreach($files as $file)
         {
             $result[] = $this->get('parabol.helper.blueimp_file')->toArray($file);
