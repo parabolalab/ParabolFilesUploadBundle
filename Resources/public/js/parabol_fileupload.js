@@ -132,6 +132,10 @@ function initFileUpload(items)
           if(!$('#' + id + '-files > li:last-child').hasClass('error'))
           {
             if(!$input.attr('multiple') && $('#' + id + '-files > li').length > 1) $('#' + id + '-files > li:not(:last-child)').remove();
+
+            console.log('fileuploadfinished', $input.data('order'), $('#' + id + ' .files > li'))
+
+            if($input.data('order') == 'desc') $('#' + id + ' .files > li:last-child').prependTo('#' + id + ' .files');
             
             updateFilesUpdatedAt(keyIndex)
 
@@ -141,11 +145,12 @@ function initFileUpload(items)
               }
             })
           .on('fileuploadprocessstart', function (e) {
-          if(typeof(parabol_file_browser_maxPerPage) == 'integer')
+            
+            if(typeof files_browser_maxPerPage == 'number')
             {
-                if($('#' + id + '-files > li').length > parabol_file_browser_maxPerPage) $('#' + id + '-files > li:' + ($input.data('order') == 'desc' ? 'last' : 'first') + '-child').hide();
+                if($('#' + id + '-files > li').length + 1 > files_browser_maxPerPage) $('#' + id + '-files > li:' + ($input.data('order') == 'desc' ? 'last' : 'first') + '-child').hide();
             }
-            if($input.data('order') == 'desc') $('#' + id + '-files > div:last-child').prependTo('#' + id + '-files');
+
           })
         .on('fileuploaddestroyed', function (e, data) {
           updateFilesUpdatedAt(keyIndex)
@@ -158,9 +163,11 @@ function initFileUpload(items)
         if($input.data('class'))
         {
           
-          var params = {params: {class: $input.data('class'), ref: $input.data('ref'),  hash: $input.data('hash') , context: $input.data('context') }, type: $input.data('type') }
+          var params = {params: {class: $input.data('class'), ref: $input.data('ref'),  hash: $input.data('hash') , context: $input.data('context') }, type: $input.data('type'), order: $input.data('order') }
 
           if($input.data('page')) params.page = $input.data('page');
+          console.log(typeof files_browser_maxPerPage)
+          if(typeof files_browser_maxPerPage === 'number') params.maxPerPage = files_browser_maxPerPage;
 
           $.getJSON(
             sf_env+'/admin/_uploader/get', 

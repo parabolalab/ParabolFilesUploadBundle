@@ -192,7 +192,7 @@ class BlueimpController extends Controller
                 ->getResult();
 
         }
-        
+
         $qb = $em
                 ->getRepository('ParabolFilesUploadBundle:File')
                 ->createQueryBuilder('f')
@@ -216,7 +216,7 @@ class BlueimpController extends Controller
 
         if($request->get('page'))
         {
-            $files = new \App\_Aliso\Base\Tools\Paginator($qb->getQuery(), $request->get('page', 1));  
+            $files = new \App\_Aliso\Base\Tools\Paginator($qb->getQuery(), $request->get('page', 1), $request->get('maxPerPage', 24));  
             $result['append'] = $this->get('templating')->render('@Base/_pagination.html.twig', ['paginator' => $files]);
         }
         else 

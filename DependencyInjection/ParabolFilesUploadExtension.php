@@ -23,7 +23,7 @@ class ParabolFilesUploadExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $container->setParameter('upload_dir', '/uploads');
-        $container->setParameter('parabol_files_upload.order', 'DESC');
+        $container->setParameter('parabol_files_upload.order', 'ASC');
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
