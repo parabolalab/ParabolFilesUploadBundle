@@ -251,7 +251,7 @@ class File extends BaseEntity
 
     public function hasAssociation()
     {
-        return $this->ref[0] !== '_';        
+        return !is_int($this->ref) && $this->ref[0] !== '_';
     }
 
     /**
