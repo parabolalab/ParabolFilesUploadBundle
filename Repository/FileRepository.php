@@ -17,7 +17,7 @@ class FileRepository extends \Parabol\BaseBundle\Entity\Base\BaseRepository
     {
     	$qb
     		->andWhere('e.class = :class')
-    		->andWhere('e.ref = :ref OR e.initRef = :initRef')
+    		->andWhere('e.ref = :ref OR (e.initRef != \'\' AND e.initRef = :initRef)')
         ->andWhere('e.context = :context')
     		->setParameter('class', $entity->getClass())
     		->setParameter('ref', $entity->getRef())
