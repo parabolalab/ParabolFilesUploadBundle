@@ -43,26 +43,26 @@ trait Files {
 
     public function __addFile(\Parabol\FilesUploadBundle\Entity\File $file, $context = 'files')
     {
-        if($this->{$context} === null) $this->{$context} =  new \Doctrine\Common\Collections\ArrayCollection();
-        $this->{$context}->add($file);
+        if($this->files === null) $this->files = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->files->add($file);
 
         return $this;
     }
 
     public function __removeFile(\Parabol\FilesUploadBundle\Entity\File $file, $context = 'files')
     {
-        $this->{$context}->removeElement($file);
+        $this->files->removeElement($file);
     }
 
     public function __getFile($context = 'files')
     {
-        return isset($this->{$context}[0]) ? $this->{$context}[0] : null;
+        return isset($this->files[0]) ? $this->files[0] : null;
     }
 
     public function __getFiles($context = 'files')
     {
         
-        return $this->{$context};
+        return $this->files;
     }
 
     public function __setFile(\Doctrine\Common\Collections\ArrayCollection $files, $context = 'files')
@@ -72,7 +72,7 @@ trait Files {
 
     public function __setFiles(\Doctrine\Common\Collections\ArrayCollection $files, $context = 'files')
     {
-        $this->{$context} = $files;
+        $this->files = $files;
 
         return $this;
     }

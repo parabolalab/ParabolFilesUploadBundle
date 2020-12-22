@@ -12,14 +12,15 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
  *
  * @ORM\Table(name="parabol_file",
  *    indexes={ 
- *       @ORM\Index(name="search_idx", columns={"class", "ref", "initRef"}),
- *       @ORM\Index(name="remove_idx", columns={"toRemove", "class"})
+ *       @ORM\Index(name="search_idx", columns={"class", "ref", "initRef"})
  *    }
  * )
  * @ORM\Entity(repositoryClass="Parabol\FilesUploadBundle\Repository\FileRepository")
  */
 class File extends BaseEntity
 {
+
+    const FIELD_NAME = 'files';
 
     use 
         ORMBehaviors\Sortable\Sortable,

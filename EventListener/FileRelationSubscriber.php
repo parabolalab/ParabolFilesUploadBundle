@@ -19,6 +19,8 @@ use Doctrine\Common\Inflector\Inflector;
 class FileRelationSubscriber implements EventSubscriber
 {
 
+    
+
     private $container, $analizer, $files = [], $ids = [], $managed = false;
 
     public function __construct($container, $analizer)
@@ -147,39 +149,39 @@ class FileRelationSubscriber implements EventSubscriber
 
 
 
-        $contexts = array_keys($class::fileContexts());
+       
 
-        foreach($contexts as $context)
-        {
-            preg_match('/[^\\\]+$/',$class, $match);
-            
-            $metadata->mapManyToMany(array(
-                'targetEntity'  => File::class,
-                'fieldName'     => $context,
-                // 'mappedBy'    => Inflector::camelize($match[0]),
-                'cascade'       => array('persist', 'remove'),
-                'orderBy'       => array('sort' => $this->container->getParameter('parabol_files_upload.order')),
-                'joinTable'     => array(
-                    'name'        => 'parabol_' . strtolower($namingStrategy->classToTableName($metadata->getName())) . '_'.$context,
-                    'joinColumns' => array(
-                        array(
-                            'name'                  => $namingStrategy->joinKeyColumnName($metadata->getName()),
-                            'referencedColumnName'  => $namingStrategy->referenceColumnName(),
-                            'onDelete'  => 'CASCADE',
-                            'onUpdate'  => 'CASCADE',
-                        ),
+       
+
+        preg_match('/[^\\\]+$/',$class, $match);
+        
+        $metadata->mapManyToMany(array(
+            'targetEntity'  => File::class,
+            'fieldName'     => File::FIELD_NAME,
+            // 'mappedBy'    => Inflector::camelize($match[0]),
+            'cascade'       => array('persist', 'remove'),
+            'orderBy'       => array('sort' => $this->container->getParameter('parabol_files_upload.order')),
+            'joinTable'     => array(
+                'name'        => 'parabol_' . strtolower($namingStrategy->classToTableName($metadata->getName())) . '_'.File::FIELD_NAME,
+                'joinColumns' => array(
+                    array(
+                        'name'                  => $namingStrategy->joinKeyColumnName($metadata->getName()),
+                        'referencedColumnName'  => $namingStrategy->referenceColumnName(),
+                        'onDelete'  => 'CASCADE',
+                        'onUpdate'  => 'CASCADE',
                     ),
-                    'inverseJoinColumns'    => array(
-                        array(
-                            'name'                  => 'file_id',
-                            'referencedColumnName'  => $namingStrategy->referenceColumnName(),
-                            'onDelete'  => 'CASCADE',
-                            'onUpdate'  => 'CASCADE',
-                        ),
-                    )
+                ),
+                'inverseJoinColumns'    => array(
+                    array(
+                        'name'                  => 'file_id',
+                        'referencedColumnName'  => $namingStrategy->referenceColumnName(),
+                        'onDelete'  => 'CASCADE',
+                        'onUpdate'  => 'CASCADE',
+                    ),
                 )
-            ));
-        }
+            )
+        ));
+        
 
 
         //additional field map for a2lix 3.x
@@ -354,7 +356,6 @@ class FileRelationSubscriber implements EventSubscriber
             } 
         }
 
-
     }
 
 
@@ -387,7 +388,7 @@ class FileRelationSubscriber implements EventSubscriber
             }
 
             $files = $qb->getQuery()->getResult();
-            
+
             if(count($files))
             {
        
