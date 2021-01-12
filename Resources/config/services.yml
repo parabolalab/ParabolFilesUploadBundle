@@ -3,7 +3,7 @@ services:
         class: Parabol\FilesUploadBundle\EventListener\FileRelationSubscriber
         arguments:
             - "@service_container"
-            - "@knp.doctrine_behaviors.reflection.class_analyzer"
+            - "@parabol.class_analyzer"
         tags:
             - { name: doctrine.event_subscriber, connection: default }        
 
