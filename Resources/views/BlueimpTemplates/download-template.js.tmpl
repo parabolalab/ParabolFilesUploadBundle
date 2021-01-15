@@ -24,6 +24,10 @@
                		<i class="ion ion-edit"></i>
                 </button>
                 {% } %} 
+
+              {% if (file.url) { %}
+                <a href="{%=file.url%}" class="btn btn-default btn-light btn-xs edit" onclick="this.target='_blank'"><i class="fa fa-eye"></i></a>
+              {% } %} 
               
               ${customButtons} 
             	
