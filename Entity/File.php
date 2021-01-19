@@ -3,10 +3,12 @@
 namespace Parabol\FilesUploadBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Knp\DoctrineBehaviors\Model as ORMBehaviors;
-use A2lix\TranslationFormBundle\Util\Knp\KnpTranslatable;
 use Parabol\BaseBundle\Entity\Base\BaseEntity;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
+use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
+use Parabol\DoctrineBehaviorsBundle\Sortable\SortableTrait;
+
 /**
  * File
  *
@@ -17,15 +19,15 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
  * )
  * @ORM\Entity(repositoryClass="Parabol\FilesUploadBundle\Repository\FileRepository")
  */
-class File extends BaseEntity
+class File extends BaseEntity implements TranslatableInterface
 {
 
     const FIELD_NAME = 'files';
 
     use 
-        ORMBehaviors\Sortable\Sortable,
-        ORMBehaviors\Translatable\Translatable
-        ;
+        TranslatableTrait,
+        SortableTrait
+    ;
 
     /**
      * @var integer

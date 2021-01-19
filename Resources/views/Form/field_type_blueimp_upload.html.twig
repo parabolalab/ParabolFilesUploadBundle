@@ -28,8 +28,8 @@
                 data-context="{{ form.vars.name }}" 
                 data-type="{{ app.request.pathInfo|split('/')|last }}" 
                 data-hash="{{ form.parent.vars.value ? form.parent.vars.value.filesHash : '' }}"
-                {% for attrname, attrvalue in form.vars.attr if attrname not in ['data', 'multiple'] %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
-                {% for attrname, attrvalue in form.vars.attr.data if attrname not in ['ref'] %} data-{{ attrname }}="{{ attrvalue }}"{% endfor %}
+                {% for attrname, attrvalue in form.vars.attr %}{% if attrname not in ['data', 'multiple'] %}{{ attrname }}="{{ attrvalue }}"{% endif %}{% endfor %}
+                {% for attrname, attrvalue in form.vars.attr.data %}{% if attrname not in ['ref'] %} data-{{ attrname }}="{{ attrvalue }}"{% endif %}{% endfor %}
                 data-ref="{{ form.parent.vars.value ? form.parent.vars.value.id : '' }}"
                 data-url="{{ path('parabol_uploader') }}" 
                 data-acceptmimetypes="{{ form.vars.acceptMimeTypes | join('|') }}"

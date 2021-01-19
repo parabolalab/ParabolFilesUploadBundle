@@ -3,7 +3,8 @@
 namespace Parabol\FilesUploadBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Knp\DoctrineBehaviors\Model as ORMBehaviors;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
+use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 use A2lix\TranslationFormBundle\Util\Knp\KnpTranslatable;
 use Parabol\BaseBundle\Entity\Base\BaseEntity;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -13,14 +14,22 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
  * @ORM\Table(name="parabol_file_translation")
  * @ORM\Entity()
  */
-class FileTranslation
+class FileTranslation implements TranslationInterface
 {
 
     use 
-        ORMBehaviors\Translatable\Translation
-        ;
+      TranslationTrait
+    ;
 
-   
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;  
+
      /**
      * @ORM\Column(name="alt", type="string", length=255, nullable=true)
      */
@@ -41,7 +50,16 @@ class FileTranslation
      */
     private $url;
 
-   
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }  
+
     
     public function __toString()
     {
