@@ -2,7 +2,7 @@
 <script id="${context}-template-download" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}<li class="btn btn-default template-download {% if (file.error) { %}error{% } %}" data-file="{%=file.url%}" data-width="{%=file.width%}" data-height="{%=file.height%}" data-id="{%=file.id%}" data-sort="{%=file.sort%}" ${thumb.onclick}> 
 
-         <input type="hidden" name="uploaded_files[]" value="{%=file.id%}" />
+         <input type="hidden" name="uploaded_files[${context}][]" value="{%=file.id%}" />
 
          <div style="position: relative">        
             

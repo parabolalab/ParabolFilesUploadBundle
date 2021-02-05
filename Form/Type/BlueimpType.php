@@ -69,6 +69,7 @@ class BlueimpType extends AbstractType
         $view->vars['append'] = $options['append'];
         $view->vars['prepend'] = $options['prepend'];
         $view->vars['withName'] = $options['withName'];
+        $view->vars['context'] = $options['context'];
 
         if($options['page'] !== null) $view->vars['attr']['data']['page'] = $options['page'];
 

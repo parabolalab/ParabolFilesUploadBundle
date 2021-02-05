@@ -25,7 +25,7 @@
                 type="file" 
                 {{ form.vars.attr.multiple is defined and form.vars.attr.multiple ? 'multiple' : '' }}
                 name="{{ form.vars.name }}[]" 
-                data-context="{{ form.vars.name }}" 
+                data-context="{{ form.vars.context ? form.vars.context : form.vars.name  }}" 
                 data-type="{{ app.request.pathInfo|split('/')|last }}" 
                 data-hash="{{ form.parent.vars.value ? form.parent.vars.value.filesHash : '' }}"
                 {% for attrname, attrvalue in form.vars.attr %}{% if attrname not in ['data', 'multiple'] %}{{ attrname }}="{{ attrvalue }}"{% endif %}{% endfor %}
