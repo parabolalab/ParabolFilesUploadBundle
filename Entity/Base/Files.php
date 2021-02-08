@@ -2,11 +2,13 @@
 
 namespace Parabol\FilesUploadBundle\Entity\Base;
 
+use \Doctrine\Common\Collections\ArrayCollection;
+
 //TODO: check context & check __call method to auto add support for other context than "files"
 
 trait Files {
 
-	public $files;
+	protected $files;
     protected $filesUpdatedAt;
     protected $filesOrder;
     protected $filesOrderHelper;
@@ -55,14 +57,22 @@ trait Files {
     }
 
     public function __getFile($context = 'files')
-    {
-        return isset($this->files[0]) ? $this->files[0] : null;
+    {   
+        foreach($this->files as $file)
+        {
+            if($file->getContext() === $context) return $file;
+        }
+        return null;
     }
 
     public function __getFiles($context = 'files')
     {
-        
-        return $this->files;
+        $files = [];
+        foreach($this->files as $file)
+        {
+            if($file->getContext() === $context) $files[] = $file;
+        }
+        return new ArrayCollection($files);
     }
 
     public function __setFile(\Doctrine\Common\Collections\ArrayCollection $files, $context = 'files')
