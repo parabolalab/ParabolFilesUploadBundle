@@ -126,7 +126,7 @@ function initFileUpload(items)
               previewMaxWidth: 100,
               previewMaxHeight: 100,
               previewCrop: true,
-              formData: {class: $input.data('class'), hash: $input.data('hash'), ref: $input.data('ref'), context: $input.data('context'), path: $input.data('path'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}         
+              formData: {class: $input.data('class'), multiple: $input.prop('multiple') ? 1 : 0, hash: $input.data('hash'), ref: $input.data('ref'), context: $input.data('context'), path: $input.data('path'), 'acceptedMimeTypes': $input.data('acceptmimetypes')}         
             })
         .on('fileuploadfinished', function (e, data) {
           if(!$('#' + id + '-files > li:last-child').hasClass('error'))

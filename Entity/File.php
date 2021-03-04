@@ -143,6 +143,11 @@ class File extends BaseEntity
      */
     private $toRemove;
 
+     /**
+     * @ORM\Column(name="multiple", type="boolean")
+     */
+    private $multiple;
+
 
     public function __construct() {
         return $this;
@@ -253,6 +258,7 @@ class File extends BaseEntity
 
     public function hasAssociation()
     {
+        
         return !is_int($this->ref) && $this->ref[0] !== '_';
     }
 
@@ -748,6 +754,39 @@ class File extends BaseEntity
     public static function isMultipleFilesAllowed()
     {
         return true;
+    }
+
+    /**
+     * Set multiple
+     *
+     * @param boolean $multiple
+     * @return File
+     */
+    public function setMultiple($multiple)
+    {
+        $this->multiple = $multiple;
+
+        return $this;
+    }
+
+    /**
+     * Get multiple
+     *
+     * @return boolean 
+     */
+    public function getMultiple()
+    {
+        return $this->multiple;
+    }
+
+    /**
+     * Get multiple
+     *
+     * @return boolean 
+     */
+    public function isMultiple()
+    {
+        return $this->multiple;
     }
 
 }

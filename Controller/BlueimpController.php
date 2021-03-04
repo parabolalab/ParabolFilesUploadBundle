@@ -19,6 +19,7 @@ class BlueimpController extends Controller
         $response = new JsonResponse();
         $class = $request->get('class');
         $context = $request->get('context');
+        $multiple = (bool)(int)$request->get('multiple', 1);
         $fileHelper = $this->get('parabol.helper.blueimp_file');
         $ref = $request->get('hash');
 
@@ -48,6 +49,7 @@ class BlueimpController extends Controller
                 $file = (new File())
                         ->setPath($path)
                         ->setContext($context)
+                        ->setMultiple($multiple)
                         ->setMimeType($uploadedfile->getMimeType() == 'text/plain' && strtolower($uploadedfile->getClientOriginalExtension()) == 'svg' ? 'image/svg+xml' : $uploadedfile->getMimeType())
                         ->setSize($uploadedfile->getSize())
                         ->setName($uploadedfile->getClientOriginalName())

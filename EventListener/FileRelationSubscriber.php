@@ -70,11 +70,11 @@ class FileRelationSubscriber implements EventSubscriber
 
     private function removeOldFileIfSingleFileInput(EntityManager $em, File $file)
     {
-         
-            $class = $file->getClass();
+          $class = $file->getClass();
+          
             
 
-            if($class && !$class::isMultipleFilesAllowed($file->getContext()) && $file->hasAssociation())
+            if($class && !$file->isMultiple())
             {
                 $oldfiles  =  $em->getRepository('ParabolFilesUploadBundle:File')->createQueryBuilder('f')
                         ->select('f')
