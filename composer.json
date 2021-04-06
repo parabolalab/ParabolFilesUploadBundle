@@ -6,7 +6,7 @@
     "description": "Symfony Files Upload Extension",
     "require" : {
         "php": ">=5.6.0",
-        "parabol/parabol-base-bundle": "dev-master",
+        "parabol/parabol-base-bundle": "^0.9",
         "parabol/parabol-doctrine-behaviors-bundle": "^1.6"
     },
     "autoload": {
