@@ -29,7 +29,7 @@ trait Files {
             $action = substr($property, 0, strlen($property) - strlen($context));
             $method = '__' . ($action ? $action : 'get') . 'File';
 
-            if($this->isMultipleFilesAllowed($context) && in_array($property[0], ['g', 's'])) $method .= 's';
+            if($this->isMultipleFilesAllowed($context) && !in_array(substr($property, 0,3), ['add', 'rem'])) $method .= 's';
 
             if(method_exists($this, $method))
             {

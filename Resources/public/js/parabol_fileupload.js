@@ -96,7 +96,8 @@ function initFileUpload(items)
         // acceptFileTypes = 
 
         var $input = $(this).find('.fileupload-input')
-        var keyIndex = $input.attr('id').replace('_' + $input.data('context'), '')
+
+        var keyIndex = $input.attr('id').replace(new RegExp('_' + $input.data('context') + '$'), '')
 
         if(typeof parabol_fileupload_sortableNewValues[keyIndex + '_filesOrder'] == 'undefined') parabol_fileupload_sortableNewValues[keyIndex + '_filesOrder'] = {}
         parabol_fileupload_sortableNewValues[keyIndex + '_filesOrder'][id] =  {'values': {}, length: 0}
