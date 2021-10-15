@@ -1,3 +1,7 @@
+parameters:
+    parabol.file_info_form.class: Parabol\FilesUploadBundle\Form\Type\FileInfoFormType
+
+
 services:
     parabol.subscriber.file_relation:
         class: Parabol\FilesUploadBundle\EventListener\FileRelationSubscriber
@@ -7,10 +11,14 @@ services:
         tags:
             - { name: doctrine.event_subscriber, connection: default }        
 
-    parabol.type_extension.blueimp_upload:
-        class: Parabol\FilesUploadBundle\Form\Type\BlueimpType
+    Parabol\FilesUploadBundle\Form\Type\BlueimpType:
+        arguments: [ "%parabol.file_info_form.class%" ]
         tags:
-            - { name: form.type, alias: blueimp_upload }
+            - { name: form.type}
+
+    blueimp_upload:
+        alias: Parabol\FilesUploadBundle\Form\Type\BlueimpType
+
 
     parabol.helper.blueimp_file:
         class: Parabol\FilesUploadBundle\Service\BlueimpFileHelper

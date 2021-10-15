@@ -149,6 +149,12 @@ class File extends BaseEntity
     private $multiple;
 
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $extraDate;
+
+
     public function __construct() {
         return $this;
     }
@@ -788,5 +794,29 @@ class File extends BaseEntity
     {
         return $this->multiple;
     }
+
+     /**
+     * Set extraDate
+     *
+     * @param \DateTime $extraDate
+     * @return File
+     */
+    public function setExtraDate(?\DateTime $extraDate = null)
+    {
+        $this->extraDate = $extraDate;
+
+        return $this;
+    }
+
+    /**
+     * Get extraDate
+     *
+     * @return boolean 
+     */
+    public function getExtraDate()
+    {
+        return $this->extraDate;
+    }
+
 
 }

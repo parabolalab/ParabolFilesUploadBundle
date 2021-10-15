@@ -11,7 +11,14 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 class BlueimpType extends AbstractType
 {
-    private static $cropperAssigned = false;
+    private static $cropperAssigned = false; 
+    private $fileInfoFormClass = null;    
+
+    public function __construct(?string $fileInfoFormClass = null)
+    {
+        $this->fileInfoFormClass = $fileInfoFormClass;
+    }
+   
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -19,7 +26,8 @@ class BlueimpType extends AbstractType
                 'description' => 'default',
                 'context' => null,
                 'multiple' => null,
-                'edditable'=> false,
+                'editable'=> false,
+                'editFormType' => $this->fileInfoFormClass,
                 'error_bubbling' => false,
                 'compound' => false,
                 'order' => 'asc',
@@ -56,14 +64,14 @@ class BlueimpType extends AbstractType
 
         $view->vars['description'] = $options['description'];
 
-
         // dump($options['class'], method_exists($options['class'], 'isMultipleFilesAllowed')); die();
         $view->vars['attr']['multiple'] = $options['multiple'] !== null ? $options['multiple'] : ($options['class'] && method_exists($options['class'], 'isMultipleFilesAllowed') ? call_user_func([$options['class'], 'isMultipleFilesAllowed'], $view->vars['name']) : false);
 
         if(!isset($view->vars['attr']['data'])) $view->vars['attr']['data'] = [];
         $view->vars['attr']['data']['order'] = $options['order'];
         $view->vars['class'] = $options['class'];
-        $view->vars['edditable'] = $options['edditable'];
+        $view->vars['editable'] = $options['editable'];
+        $view->vars['editFormType'] = $options['editFormType'];
         $view->vars['cropper'] = $options['cropper'];
         $view->vars['customButtons'] = $options['customButtons'];
         $view->vars['append'] = $options['append'];

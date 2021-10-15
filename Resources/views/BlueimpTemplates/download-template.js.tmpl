@@ -19,8 +19,8 @@
 
 
 
-            	{% if (${edditable}) { %}
-                <button class="btn btn-default btn-light btn-xs edit"  onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}" data-form-class="\App\FileAdminBundle\Form\Type\File\EditType" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%= sf_env %}/admin/files/{%=file.id%}/updateDialog" >
+            	{% if (${editable} && '${editFormType}' !== '') { %}
+                <button class="btn btn-default btn-light btn-xs edit"  onclick="return $(this).admin_core_showDialogForm();" data-dialog-form="{%=file.editUrl%}?formClass=${editFormType}" data-form-class="${editFormType}" data-entity="\Parabol\FilesUploadBundle\Entity\File" data-id="{%=file.id%}" data-form-action="{%=file.editUrl%}?formClass=${editFormType}" >
                		<i class="ion ion-edit"></i>
                 </button>
                 {% } %} 
