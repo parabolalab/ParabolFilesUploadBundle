@@ -15,6 +15,24 @@ function hashCode(value) {
   return Math.abs(hash).toString(16) + Math.abs(hash * 1234567).toString(16);
 };
 
+function onLoadFilemanager()
+{
+  $(this).contents().on('click','.select',function () {
+      var path = $(this).attr('data-path')
+      // $('#path').val(path);
+      // $('#image').attr('src', path)  
+
+      fetch(path)
+        .then(function(response){ return response.blob() })
+        .then(function(blob){ 
+            console.log($(fileManagerWidget).closest('.fileupload'))
+            $(fileManagerWidget).closest('.fileupload').fileupload('add', { files: [ blob ] });
+            $('#adminModal').modal('hide')
+      })
+
+  });
+}
+
 $(document).ready(function () {
        
     $cookieshash = document.cookie.match(/parabol_fileupload_hash=([^;]+)/)
@@ -55,6 +73,19 @@ $(document).ready(function () {
 })
 
 
+var fileManagerWidget = null;
+
+function openFileManager(e)
+{
+
+    fileManagerWidget = e.currentTarget;
+
+    let modal = $($(fileManagerWidget).data('modal'));
+    if(modal.find('.modal-body #filemanager').length === 0) 
+      modal.find('.modal-body').html('<style>#adminModal > .modal-dialog { width: 97vw;} </style></script><iframe id="filemanager" src="' + $(fileManagerWidget).data('path') + '" style="width: 100%; min-height: 500px; height: -webkit-calc(100vh - (200px)); height: -moz-calc(100vh - (200px)); height: calc(100vh - (200px));" frameborder="0"></iframe><script>$("#filemanager").on("load", onLoadFilemanager )</script>')
+
+    modal.modal('show');
+}
 
 
 function initFileUpload(items)
@@ -96,6 +127,9 @@ function initFileUpload(items)
         // acceptFileTypes = 
 
         var $input = $(this).find('.fileupload-input')
+
+        $(this).find('.filesmanager-button').click(openFileManager)
+
 
         var keyIndex = $input.attr('id').replace(new RegExp('_' + $input.data('context') + '$'), '')
 

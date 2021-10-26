@@ -1,6 +1,7 @@
 parameters:
-    parabol.file_info_form.class: Parabol\FilesUploadBundle\Form\Type\FileInfoFormType
-
+    parabol.files_uploads.file_info_form.class: Parabol\FilesUploadBundle\Form\Type\FileInfoFormType
+    parabol.files_uploads.filemanager_modal_selector: null
+    parabol.files_uploads.filemanager_path: '/admin/manager?module=1&conf=button'
 
 services:
     parabol.subscriber.file_relation:
@@ -11,14 +12,15 @@ services:
         tags:
             - { name: doctrine.event_subscriber, connection: default }        
 
-    Parabol\FilesUploadBundle\Form\Type\BlueimpType:
-        arguments: [ "%parabol.file_info_form.class%" ]
+    parabol.type_extension.blueimp_upload:
+        class: Parabol\FilesUploadBundle\Form\Type\BlueimpType
+        arguments: 
+            $configuration: 
+                fileInfoFormClass: '%parabol.files_uploads.file_info_form.class%'
+                filemanagerModalSelector: '%parabol.files_uploads.filemanager_modal_selector%'
+                filemanagerPath: '%parabol.files_uploads.filemanager_path%'
         tags:
-            - { name: form.type}
-
-    blueimp_upload:
-        alias: Parabol\FilesUploadBundle\Form\Type\BlueimpType
-
+            - { name: form.type, alias: blueimp_upload }
 
     parabol.helper.blueimp_file:
         class: Parabol\FilesUploadBundle\Service\BlueimpFileHelper

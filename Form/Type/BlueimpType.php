@@ -11,14 +11,13 @@ use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 class BlueimpType extends AbstractType
 {
-    private static $cropperAssigned = false; 
-    private $fileInfoFormClass = null;    
+    private static $cropperAssigned = false;
+    private $configuration;
 
-    public function __construct(?string $fileInfoFormClass = null)
+    public function __construct(array $configuration)
     {
-        $this->fileInfoFormClass = $fileInfoFormClass;
+            $this->configuration = $configuration;
     }
-   
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -27,7 +26,7 @@ class BlueimpType extends AbstractType
                 'context' => null,
                 'multiple' => null,
                 'editable'=> false,
-                'editFormType' => $this->fileInfoFormClass,
+                'editFormType' => isset($this->configuration['fileInfoFormClass']) ? $this->configuration['fileInfoFormClass'] : null,
                 'error_bubbling' => false,
                 'compound' => false,
                 'order' => 'asc',
@@ -51,7 +50,9 @@ class BlueimpType extends AbstractType
                 "allow_add" => null, 
                 "entry_options" => null, 
                 "entry_type" => null,
-                "page" => null
+                "page" => null,
+                "filemanagerModalSelector" => isset($this->configuration['filemanagerModalSelector']) ? $this->configuration['filemanagerModalSelector'] : null,
+                "filemanagerPath" => isset($this->configuration['filemanagerPath']) ? $this->configuration['filemanagerPath'] : null,
         ));
 
          $resolver->setAllowedTypes('class', 'string');
@@ -78,6 +79,8 @@ class BlueimpType extends AbstractType
         $view->vars['prepend'] = $options['prepend'];
         $view->vars['withName'] = $options['withName'];
         $view->vars['context'] = $options['context'];
+        $view->vars['filemanagerModalSelector'] = $options['filemanagerModalSelector'];
+        $view->vars['filemanagerPath'] = $options['filemanagerPath'];
 
         if($options['page'] !== null) $view->vars['attr']['data']['page'] = $options['page'];
 

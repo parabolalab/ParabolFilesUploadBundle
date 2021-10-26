@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="row">
-        <div class="col-lg-2 col-md-3 col-md-4">
+        <div class="col-lg-12 col-md-12 col-md-12">
     	<span class="btn btn-primary fileinput-button">
             <i class="glyphicon glyphicon-plus"></i>&nbsp; <span>{% if form.vars.attr.multiple is defined and form.vars.attr.multiple %}{% trans %}Select Files{% endtrans %}{% else %}{% trans %}Select File{% endtrans %}{% endif %}</span>
             <!-- The file input field used as target for the file upload widget -->
@@ -36,6 +36,18 @@
                 accept="{{ form.vars.acceptMimeTypes | join(',') }}" 
             />
         </span>
+        
+        {% if form.vars.filemanagerModalSelector %}
+
+            <span style="padding: 0 10px">or</span> 
+
+            <span class="btn btn-primary filesmanager-button" data-modal="{{ form.vars.filemanagerModalSelector }}" data-path="{{ form.vars.filemanagerPath }}">
+                <i class="glyphicon glyphicon-th"></i>&nbsp; <span>{% trans %}Open Files Manager{% endtrans %}</span>
+                </span>
+            
+
+        {% endif %}
+
         </div>
 
         <div class="col-sm-8 fileupload-progress fade">
@@ -82,7 +94,6 @@
 
 
 {#
-
 
 
 
