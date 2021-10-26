@@ -18,15 +18,17 @@ function hashCode(value) {
 function onLoadFilemanager()
 {
   $(this).contents().on('click','.select',function () {
-      var path = $(this).attr('data-path')
+      var path = $(this).data('path')
+      var name = $(this).data('value')
       // $('#path').val(path);
       // $('#image').attr('src', path)  
 
       fetch(path)
-        .then(function(response){ return response.blob() })
+        .then(function(response){ 
+          return response.blob()
+        })
         .then(function(blob){ 
-            console.log($(fileManagerWidget).closest('.fileupload'))
-            $(fileManagerWidget).closest('.fileupload').fileupload('add', { files: [ blob ] });
+            $(fileManagerWidget).closest('.fileupload').fileupload('add', { files: [ new File([blob], name, {lastModified: new Date()}) ] });
             $('#adminModal').modal('hide')
       })
 
