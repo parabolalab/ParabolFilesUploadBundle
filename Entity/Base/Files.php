@@ -43,9 +43,14 @@ trait Files {
 
     }
 
+    private function createFilesArray()
+    {
+        if($this->files === null) $this->files = new ArrayCollection();
+    }
+
     public function __addFile(\Parabol\FilesUploadBundle\Entity\File $file, $context = 'files')
     {
-        if($this->files === null) $this->files = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->createFilesArray();
         $this->files->add($file);
 
         return $this;
@@ -58,6 +63,7 @@ trait Files {
 
     public function __getFile($context = 'files')
     {   
+        $this->createFilesArray();
         foreach($this->files as $file)
         {
             if($file->getContext() === $context) return $file;
@@ -67,6 +73,7 @@ trait Files {
 
     public function __getFiles($context = 'files')
     {
+        $this->createFilesArray();
         $files = [];
         foreach($this->files as $file)
         {
@@ -75,12 +82,12 @@ trait Files {
         return new ArrayCollection($files);
     }
 
-    public function __setFile(\Doctrine\Common\Collections\ArrayCollection $files, $context = 'files')
+    public function __setFile(ArrayCollection $files, $context = 'files')
     {
         return $this->__setFiles($files, $context);
     }
 
-    public function __setFiles(\Doctrine\Common\Collections\ArrayCollection $files, $context = 'files')
+    public function __setFiles(ArrayCollection $files, $context = 'files')
     {
         $this->files = $files;
 
