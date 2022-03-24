@@ -440,7 +440,7 @@ class FileRelationSubscriber implements EventSubscriber
     {
             $fs = new Filesystem();
 
-            $newDir = strtr( dirname($file->getPath()), [ $file->getRef() => $entity->getId() ] );
+            $newDir = strtr( dirname($file->getPath()), [ $file->getRef() => $entity->getId(), '/' => DIRECTORY_SEPARATOR ] );
             $filename = $this->container->get('parabol.helper.blueimp_file')->getUniqueFilename( $this->container->get('parabol.utils.path')->getWebDir() . $newDir, $file->getFilename());
         
             $oldPath = $file->getPath();
@@ -478,10 +478,10 @@ class FileRelationSubscriber implements EventSubscriber
                         true
                     );
 
-                    if( count(glob($webdir . dirname($oldThumbPath) . '/*' )) === 0 ) $fs->remove($webdir . dirname($oldThumbPath));
+                    if( count(glob($webdir . dirname($oldThumbPath) . DIRECTORY_SEPARATOR . '*' )) === 0 ) $fs->remove($webdir . dirname($oldThumbPath));
                 }
                 
-                if( count(glob($webdir . dirname($oldPath) . '/*' )) === 0 ) $fs->remove($webdir . dirname($oldPath));
+                if( count(glob($webdir . dirname($oldPath) .  DIRECTORY_SEPARATOR .'*' )) === 0 ) $fs->remove($webdir . dirname($oldPath));
             }
 
             return $newPath;
@@ -495,7 +495,7 @@ class FileRelationSubscriber implements EventSubscriber
         {
             $this->container->get('liip_imagine.cache.manager')->remove($entity->getPath());
             if($entity->getCropBoxData()) $this->container->get('liip_imagine.cache.manager')->remove($entity->getCroppedPath());
-            $path = $this->container->get('parabol.utils.path')->getWebDir().$entity->getPath();
+            $path = $this->container->get('parabol.utils.path')->getWebDir().strtr($entity->getPath(), ['/' => DIRECTORY_SEPARATOR]);
             if(file_exists($path)) unlink($path);
             @rmdir(dirname($path));
         }
