@@ -165,6 +165,21 @@ trait Files {
         $this->filesHash = $value;
         return $this;
     }
+
+    public function getFiles()
+    {
+        return $this->__getFiles('files');
+    }
+
+    public function addFile($file)
+    {
+        
+    }
+
+    public function removeFile($file)
+    {
+
+    }
 }
 
 ?>

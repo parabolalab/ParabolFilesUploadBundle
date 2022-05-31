@@ -51,6 +51,7 @@ class BlueimpType extends AbstractType
                 "entry_options" => null, 
                 "entry_type" => null,
                 "page" => null,
+                "globalRequest" => null,
                 "filemanagerModalSelector" => isset($this->configuration['filemanagerModalSelector']) ? $this->configuration['filemanagerModalSelector'] : null,
                 "filemanagerPath" => isset($this->configuration['filemanagerPath']) ? $this->configuration['filemanagerPath'] : null,
         ));
@@ -81,6 +82,7 @@ class BlueimpType extends AbstractType
         $view->vars['context'] = $options['context'];
         $view->vars['filemanagerModalSelector'] = $options['filemanagerModalSelector'];
         $view->vars['filemanagerPath'] = $options['filemanagerPath'];
+        $view->vars['globalRequest'] = $options['globalRequest'];
 
         if($options['page'] !== null) $view->vars['attr']['data']['page'] = $options['page'];
 
