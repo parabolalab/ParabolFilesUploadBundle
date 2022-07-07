@@ -39,7 +39,7 @@
         
         {% if form.vars.filemanagerModalSelector %}
 
-            <span style="padding: 0 10px">or</span> 
+            <span style="padding: 0 10px">{% trans %}or{% endtrans %}</span> 
 
             <span class="btn btn-primary filesmanager-button" data-modal="{{ form.vars.filemanagerModalSelector }}" data-path="{{ form.vars.filemanagerPath }}">
                 <i class="glyphicon glyphicon-th"></i>&nbsp; <span>{% trans %}Open Files Manager{% endtrans %}</span>
