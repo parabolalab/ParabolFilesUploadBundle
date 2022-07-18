@@ -414,7 +414,17 @@ class File extends BaseEntity
 
     public function isImage()
     {
-        return $this->getMimeType() != 'image/svg+xml' && strpos($this->getMimeType(), 'image/') !== false;
+        return !$this->isSvg() && strpos($this->getMimeType(), 'image/') !== false;
+    }
+
+    public function isSvg()
+    {
+        return in_array($this->getMimeType(), ['image/svg+xml', 'image/svg']);
+    }
+
+    public function isSvgOrImage()
+    {
+        return $this->isSvg() || $this->isImage();
     }
 
 
