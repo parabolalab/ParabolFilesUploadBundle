@@ -363,6 +363,7 @@ class FileRelationSubscriber implements EventSubscriber
     {
         if($this->hasFilesTrait($entity))
         {
+            $recompute = false;
             $uow = $em->getUnitOfWork();
             $sessionId = $this->container->get('session')->getId();
             $class = get_class($entity);
@@ -412,7 +413,7 @@ class FileRelationSubscriber implements EventSubscriber
 
                 if($action === 'edit')
                 {
-                    $uow->computeChangeSets();
+                    $recompute = true;
                 } 
 
             }
@@ -428,10 +429,14 @@ class FileRelationSubscriber implements EventSubscriber
                 foreach($filesToRemove as $file)
                 {
                     $uow->scheduleForDelete($file);    
+                    $recompute = true;
                 } 
             }
 
-
+            if($recompute)
+            {
+                $uow->computeChangeSets();
+            }
         }
 
     }
