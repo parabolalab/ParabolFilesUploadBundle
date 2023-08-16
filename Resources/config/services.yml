@@ -2,6 +2,9 @@ parameters:
     parabol.files_uploads.file_info_form.class: Parabol\FilesUploadBundle\Form\Type\FileInfoFormType
     parabol.files_uploads.filemanager_modal_selector: null
     parabol.files_uploads.filemanager_path: '/admin/manager?module=1&conf=button'
+    parabol.files_uploads.images.maxSize: 2500K
+    parabol.files_uploads.images.maxDimension: 4032
+    parabol.files_uploads.files.maxSize: 2500K
 
 services:
     parabol.subscriber.file_relation:

@@ -144,16 +144,16 @@ class BlueimpController extends Controller
 
             $fileConstraint = new \Symfony\Component\Validator\Constraints\Image([
                     'mimeTypes' => $acceptedMimeTypes, 
-                    'maxSize' => '5m', 
-                    'maxWidth' => 3840, 
-                    'maxHeight' => 3840
+                    'maxSize' => $this->container->getParameter('parabol.files_uploads.images.maxSize'), 
+                    'maxWidth' => $this->container->getParameter('parabol.files_uploads.images.maxDimension'), 
+                    'maxHeight' => $this->container->getParameter('parabol.files_uploads.images.maxDimension')
             ]);
         }
         else 
         {
             $fileConstraint = new \Symfony\Component\Validator\Constraints\File([
                     'mimeTypes' => $acceptedMimeTypes, 
-                    'maxSize' => '95m'
+                    'maxSize' => $this->container->getParameter('parabol.files_uploads.files.maxDimension')
             ]);
         }
 
