@@ -52,7 +52,7 @@ class File extends BaseEntity
     private $class;
 
     /**
-     * @ORM\Column(name="ref", type="string", length=65, nullable=true)
+     * @ORM\Column(name="`ref`", type="string", length=65, nullable=true)
      */
     private $ref;
 

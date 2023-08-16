@@ -73,6 +73,22 @@ class BlueimpController extends Controller
                 {
 
                     $uploadedfile->move($dir, $filename);
+                    $sourceFilter = $this->container->getParameter('parabol.files_uploads.images.source.imagine_filter_name');
+                    
+                    if($sourceFilter)
+                    {
+                        $resourcePath = $this->get('parabol.utils.path')->getWebDir().$this->get('parabol.utils.path')->trimHost(
+                            $fileHelper->getImagine()->getUrlOfFilteredImage($path, $sourceFilter)
+                        );
+
+                        rename($resourcePath, $dir . DIRECTORY_SEPARATOR . $filename);
+                    }
+
+                    $file->setSize(filesize($dir . DIRECTORY_SEPARATOR . $filename));
+                    list($width, $height) = getimagesize($dir . DIRECTORY_SEPARATOR . $filename);
+                    $file->setWidth($width);
+                    $file->setHeight($height);
+                    
                     $em->persist($file);
                     $em->flush();
 

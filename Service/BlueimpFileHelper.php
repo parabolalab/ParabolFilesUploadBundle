@@ -10,10 +10,11 @@ class BlueimpFileHelper
 	private $router;
 	private $liipCacheManager;
 	
-	function __construct($router, $liipCacheManager)
+	function __construct($router, $liipCacheManager, $imagine)
 	{
 		$this->router = $router;
 		$this->liipCacheManager = $liipCacheManager;	
+        $this->imagine = $imagine;
 	}
 
 	public function toArray(\Parabol\FilesUploadBundle\Entity\File $file, $allowDeletePattern = null, $thumbName = 'admin_thumb')
@@ -53,7 +54,7 @@ class BlueimpFileHelper
 	}
 
 	public function getUniqueFilename($dir, $filename)
-  {
+    {
         $i = 1;
         $orgname = $filename;
         while(file_exists($dir . DIRECTORY_SEPARATOR . $filename))
@@ -63,7 +64,12 @@ class BlueimpFileHelper
         }
 
         return $filename;
-  }
+    }
+
+    public function getImagine()
+    {
+        return $this->imagine;
+    }
 
 
 }
